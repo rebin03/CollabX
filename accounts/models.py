@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from random import randint
 
 # Create your models here.
 
@@ -12,11 +13,17 @@ class BaseModel(models.Model):
 class User(AbstractUser):
     otp = models.CharField(max_length=20, null=True, blank=True)
     phone = models.CharField(max_length=10, null=True, unique=True)
+    is_brand = models.BooleanField(default=False)
+    
+    def generate_otp(self):
+        
+        self.otp = str(randint(10,99)) + str(randint(10,99)) + str(randint(10,99))
+        self.save()
 
 
 class Profile(BaseModel):
     owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    full_name = models.CharField(max_length=50, null=False, blank=False)
+    full_name = models.CharField(max_length=50, null=True, blank=True)
     bio = models.TextField()
     profile_picture = models.ImageField(upload_to='media/profile_pics', null=True, blank=True)
     contact_detail = models.CharField(max_length=100)
