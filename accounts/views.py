@@ -1,9 +1,10 @@
 from django.shortcuts import redirect, render
 from django.views.generic import View
-from accounts.forms import BrandSignUpForm
+from accounts.forms import BrandProfileForm, BrandSignUpForm, ProfileForm, SignInForm
 from django.core.mail import send_mail
 from accounts.models import User
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
 
 # Create your views here.
 
@@ -40,7 +41,7 @@ class BrandSignUpView(View):
         
         if form.is_valid():
             
-            form.instance.is_brand = True
+            # form.instance.is_brand = True
             user_obj = form.save(commit=False)
             user_obj.is_active = False
             user_obj.save()
@@ -74,17 +75,84 @@ class VerifyEmailView(View):
             user_obj.otp = None
             user_obj.save()
             
-            return redirect('create-brand-profile')
+            if user_obj.is_brand:
+                return redirect('create-brand-profile')
+            else:
+                pass
             
         except:
             messages.error(request, 'Invalid OTP')
             return render(request, self.template_name)
         
         
-class BrandProfileCreateView(View):
+class SignInView(View):
     
-    template_name = 'brand_profile_form.html'
+    template_name = 'signin.html'
+    form_class = SignInForm
     
     def get(self, request, *args, **kwargs):
         
+        form = self.form_class()
+        
+        return render(request, self.template_name, {'form':form})
+    
+    def post(self, request, *args, **kwargs):
+        
+        form_data = request.POST
+        form = self.form_class(form_data)
+        
+        if form.is_valid():
+            
+            uname = form.cleaned_data.get('username')
+            pwd = form.cleaned_data.get('password')
+            
+            user_obj = authenticate(request, username=uname, password=pwd)
+            
+
+            
+            if user_obj:
+                
+                login(request, user_obj)
+                return redirect('home')
+            
+        return render(request, self.template_name, {'form':form})
+        
+        
+class BrandProfileCreateView(View):
+    
+    template_name = 'brand_profile_form.html'
+    profile_form_class = ProfileForm
+    brand_form_class = BrandProfileForm
+    
+    def get(self, request, *args, **kwargs):
+        
+        profile_form = self.profile_form_class()
+        brand_form = self.brand_form_class()
+        
+        context = {
+            'profile_form': profile_form,
+            'brand_form': brand_form,
+        }
+        
+        return render(request, self.template_name, context)
+        
+    
+    def post(self, request, *args, **kwargs):
+        
+        form_data = request.POST
+        files = request.FILES
+        
+        profile_form = self.profile_form_class(form_data, files)
+        brand_form = self.brand_form_class(form_data)
+        
+        if profile_form.is_valid() and brand_form.is_valid():
+            
+            profile = profile_form.save(commit=False)
+            profile.owner = request.user
+            profile_form.save()
+            brand_profile = brand_form.save(commit=False)
+            brand_profile.profile_object = profile
+            brand_form.save()
+            return redirect('home')
+            
         return render(request, self.template_name)
