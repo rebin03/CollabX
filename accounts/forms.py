@@ -6,11 +6,12 @@ from accounts.models import BrandProfile, CreatorProfile, Profile, User
 class BrandSignUpForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ['email', 'password1', 'password2', 'phone']
+        fields = ['email', 'password1', 'password2', 'phone', 'is_brand']
         
     def save(self, commit=True):
         user = super().save(commit=False)
         user.username = self.cleaned_data.get('email')
+        user.is_brand = True
 
         if commit:
             user.save()
