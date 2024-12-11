@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from accounts.models import BrandProfile, CreatorProfile, Profile, User
+from accounts.models import BrandIndustry, BrandProfile, BrandType, CreatorProfile, Profile, User
 
 
 class BrandSignUpForm(UserCreationForm):
@@ -47,6 +47,26 @@ class CreatorProfileForm(forms.ModelForm):
         }
         
 class BrandProfileForm(forms.ModelForm):
+    
+    brand_type = forms.ModelChoiceField(
+        queryset=BrandType.objects.all(),
+        required=False,
+        empty_label="Select brand type",
+        widget=forms.Select(attrs={
+            "class": "mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500",
+            "id": "brand-type",
+        })
+    )
+    brand_industry = forms.ModelChoiceField(
+        queryset=BrandIndustry.objects.all(),
+        required=False,
+        empty_label="Select industry",
+        widget=forms.Select(attrs={
+            "class": "mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500",
+            "id": "industry",
+        })
+    )
+    
     class Meta:
         model = BrandProfile
         fields = ['brand_name', 'website', 'brand_type', 'brand_industry']
