@@ -147,6 +147,7 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+    'accounts.authentication.EmailOrPhoneBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
