@@ -76,7 +76,7 @@ class VerifyEmailView(View):
             user_obj.save()
             
             if user_obj.is_brand:
-                return redirect('create-brand-profile')
+                return redirect('signin')
             else:
                 pass
             
@@ -113,7 +113,12 @@ class SignInView(View):
             if user_obj:
                 
                 login(request, user_obj)
-                return redirect('home')
+                
+                try:
+                    if request.user.profile:
+                        return redirect('home')
+                except:
+                    return redirect('create-brand-profile')
             
         return render(request, self.template_name, {'form':form})
         
@@ -155,4 +160,9 @@ class BrandProfileCreateView(View):
             brand_form.save()
             return redirect('home')
             
-        return render(request, self.template_name)
+        context = {
+            'profile_form': profile_form,
+            'brand_form': brand_form,
+        }
+        
+        return render(request, self.template_name, context)
