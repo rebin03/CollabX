@@ -4,31 +4,21 @@
 <div class="bg-gray-50 flex items-center justify-center min-h-screen">
     <div class="w-full max-w-md">
         <!-- Heading -->
-        <h1 class="text-2xl font-bold text-gray-800 text-center mb-2">Create your brand account</h1>
-        <p class="text-sm text-gray-600 text-center mb-6">Join our platform and connect with creators</p>
+        <h1 class="text-2xl font-bold text-gray-800 text-center mb-2">Sign In</h1>
+        <p class="text-sm text-gray-600 text-center mb-6">Welcome back 😀!</p>
         
         <!-- Signup Form -->
         <form action="#" method="post" class="space-y-4">
             {% csrf_token %}
           <!-- Email -->
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input id="email" name="email" type="email" placeholder="your@email.com" required class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+            <label for="email-or-phone" class="block text-sm font-medium text-gray-700">Email or Phone Number</label>
+            <input id="email-or-phone" name="username" type="text" placeholder="Enter your email or phone number" required class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
           </div>
           <!-- Password -->
           <div>
-            <label for="password1" class="block text-sm font-medium text-gray-700">Password</label>
-            <input id="password1" name="password1" type="password" required class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
-          </div>
-          <!-- Confirm Password -->
-          <div>
-            <label for="password2" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-            <input id="password2" name="password2" type="password" required class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
-          </div>
-          <!-- Phone Number -->
-          <div>
-            <label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
-            <input id="phone" name="phone" type="tel" placeholder="+(91) 111 2222 0000" class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
+            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+            <input id="password" name="password" type="password" placeholder="Enter your password" required class="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500">
           </div>
           <!-- Signup Button -->
           <button type="submit" class="w-full bg-purple-500 text-white py-2 rounded-lg hover:bg-purple-600">
@@ -51,8 +41,11 @@
                 <path d="M20 36.6667C24.305 36.6667 28.2167 35.0192 31.1742 32.34L26.0159 27.975C24.3425 29.2425 22.2625 30 20 30C15.665 30 11.9842 27.2359 10.5975 23.3784L5.16254 27.5659C7.92087 32.9634 13.5225 36.6667 20 36.6667Z" fill="#4CAF50" />
                 <path d="M36.3425 16.7358H35V16.6667H20V23.3333H29.4192C28.7592 25.1975 27.56 26.805 26.0133 27.9758C26.0142 27.975 26.015 27.975 26.0158 27.9742L31.1742 32.3392C30.8092 32.6708 36.6667 28.3333 36.6667 20C36.6667 18.8825 36.5517 17.7917 36.3425 16.7358Z" fill="#1976D2" />
             </svg>      
-            <span>Sign up with Google</span>
+            <span>Sign In with Google</span>
         </a>
+        <div class="text-center mt-5">
+            <span>Are you new here?<a href="" class="text-blue-500"> Register</a></span>
+        </div>
     </div>
 </div>
 {% endblock %}

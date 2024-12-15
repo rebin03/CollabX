@@ -1,11 +1,108 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    brand profile form here
-</body>
-</html>
+{% extends 'accounts_base.html' %}
+
+{% block style %}
+<style>
+    body{
+        background-color: #F3F4F6;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<!-- Profile Form Errors -->
+{% if profile_form.errors %}
+  <div class="text-red-500">
+    {{ profile_form.errors }}
+  </div>
+{% endif %}
+
+<!-- Brand Form Errors -->
+{% if brand_form.errors %}
+  <div class="text-red-500">
+    {{ brand_form.errors }}
+  </div>
+{% endif %}
+
+<div class="flex bg-gray-100 justify-center items-center min-h-screen px-4 sm:px-6 lg:px-8 my-12 lg:my-16">
+    <div class="bg-white shadow-md rounded-lg w-full max-w-3xl p-6 sm:p-8">
+      <!-- Title -->
+      <h2 class="text-center text-2xl font-semibold text-gray-800 mb-6">Complete profile to continue</h2>
+
+      <!-- Form Fields -->
+      <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Profile Image -->
+        <div class="flex justify-center mb-6">
+          <div class="relative w-24 h-24 rounded-full overflow-hidden border-dashed border-2 border-gray-300">
+            <img id="profile-preview" src="https://via.placeholder.com/150" alt="Profile" class="w-full h-full object-cover">
+          </div>
+        </div>
+
+        <!-- Upload Button -->
+        <div class="flex flex-col items-center mb-6">
+          <label for="file-upload" class="cursor-pointer border bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300">
+            Choose File
+          </label>
+          <input id="file-upload" name="profile_picture" type="file" accept="image/*" class="hidden">
+          <span id="file-name" class="mt-2 text-sm text-gray-500">No file chosen</span>
+        </div>
+
+        <!-- Company Name -->
+        <div class="mb-4">
+          <label for="company-name" class="block text-sm font-medium text-gray-700">Company Name<span class="text-red-600">*</span></label>
+          <input id="company-name" name="full_name" type="text" placeholder="Enter your company name" class="mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+          <label for="description" class="block text-sm font-medium text-gray-700">Description<span class="text-red-600">*</span></label>
+          <textarea id="description" name="bio" rows="3" placeholder="Enter a brief description about your company" class="mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"></textarea>
+        </div>
+
+        <!-- Brand Name -->
+        <div class="mb-4">
+          <label for="brand-name" class="block text-sm font-medium text-gray-700">Brand Name<span class="text-red-600">*</span></label>
+          <input id="brand-name" name="brand_name" type="text" placeholder="Enter your brand name" class="mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+        </div>
+
+        <!-- Brand Type -->
+        <div class="mb-4">
+        <label for="brand-type" class="block text-sm font-medium text-gray-700">Brand Type<span class="text-red-600">*</span></label>
+        {{ brand_form.brand_type }}
+        </div>
+
+        <!-- Industry -->
+        <div class="mb-4">
+        <label for="industry" class="block text-sm font-medium text-gray-700">Industry<span class="text-red-600">*</span></label>
+        {{ brand_form.brand_industry }}
+        </div>
+
+
+        <!-- Address -->
+        <div class="mb-4">
+          <label for="address" class="block text-sm font-medium text-gray-700">Address<span class="text-red-600">*</span></label>
+          <textarea id="address" name="address" rows="2" placeholder="Enter your company address" class="mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"></textarea>
+        </div>
+
+        <!-- Contact Details -->
+        <div class="mb-4">
+          <label for="contact" class="block text-sm font-medium text-gray-700">Contact Details (Optional)</label>
+          <input id="contact" name="contact_detail" type="text" placeholder="Enter your contact number" class="mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+        </div>
+
+        <!-- Website -->
+        <div class="mb-4">
+          <label for="website" class="block text-sm font-medium text-gray-700">Website (Optional)</label>
+          <input id="website" name="website" type="text" placeholder="Enter your website URL" class="mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4">
+          <button type="submit" class="w-full sm:w-auto bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-600">
+            Continue
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
