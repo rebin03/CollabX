@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, render
 from django.views.generic import View
-from accounts.forms import BrandProfileForm, BrandSignUpForm, ProfileForm, SignInForm
+from accounts.forms import BrandProfileForm, BrandSignUpForm, CreatorProfileForm, CreatorSignUpForm, ProfileForm, SignInForm
 from django.core.mail import send_mail
 from accounts.models import User
 from django.contrib import messages
@@ -56,6 +56,44 @@ class BrandSignUpView(View):
         print('Failed to create brand user!')
         return render(request, self.template_name, context)
     
+    
+class CreatorSignUpView(View):
+    
+    template_name = 'creator_signup.html'
+    form_class = CreatorSignUpForm
+    
+    def get(self, request, *args, **kwargs):
+        
+        form = self.form_class()
+        
+        context = {
+            'form':form
+        }
+        
+        return render(request, self.template_name, context)
+    
+    
+    def post(self, request, *args, **kwargs):
+        
+        form_data = request.POST
+        form = self.form_class(form_data)
+        
+        if form.is_valid():
+            
+            user_obj = form.save(commit=False)
+            user_obj.is_active = False
+            user_obj.save()
+            send_otp_email(user_obj)    
+            
+            return redirect('verify-email')
+        
+        context = {
+            'form': form,
+        }
+        
+        print('Failed to create creator user!')
+        return render(request, self.template_name, context)    
+    
 
 class VerifyEmailView(View):
     
@@ -74,11 +112,7 @@ class VerifyEmailView(View):
             user_obj.is_active = True
             user_obj.otp = None
             user_obj.save()
-            
-            if user_obj.is_brand:
-                return redirect('signin')
-            else:
-                pass
+            return redirect('signin')
             
         except:
             messages.error(request, 'Invalid OTP')
@@ -108,17 +142,24 @@ class SignInView(View):
             
             user_obj = authenticate(request, username=uname, password=pwd)
             
-
-            
             if user_obj:
                 
                 login(request, user_obj)
-                
-                try:
-                    if request.user.profile:
+                print("User Object Authenticated:", user_obj.is_authenticated)
+                print("Is user authenticated?", request.user.is_authenticated)
+                print("Logged in User:", request.user)
+
+                if user_obj.is_brand:
+                    # Check if the user has a profile
+                    if request.user.has_profile:
+                        return redirect('add-campaign')
+                    else:
+                        return redirect('create-brand-profile')
+                else:
+                    if request.user.has_profile:
                         return redirect('home')
-                except:
-                    return redirect('create-brand-profile')
+                    else:
+                        return redirect('create-creator-profile')
             
         return render(request, self.template_name, {'form':form})
         
@@ -166,3 +207,50 @@ class BrandProfileCreateView(View):
         }
         
         return render(request, self.template_name, context)
+    
+
+class CreatorProfileCreateView(View):
+    
+    template_name = 'creator_profile_form.html'
+    profile_form_class = ProfileForm
+    creator_form_class = CreatorProfileForm
+    
+    def get(self, request, *args, **kwargs):
+        
+        profile_form = self.profile_form_class()
+        creator_form = self.creator_form_class()
+        print(request.user)
+        
+        context = {
+            'profile_form': profile_form,
+            'creator_form': creator_form,
+        }
+        
+        return render(request, self.template_name, context)
+    
+    
+    def post(self, request, *args, **kwargs):
+        
+        form_data = request.POST
+        files = request.FILES
+        
+        profile_form = self.profile_form_class(form_data, files)
+        creator_form = self.creator_form_class(form_data)
+
+        if profile_form.is_valid() and creator_form.is_valid():
+            
+            profile = profile_form.save(commit=False)
+            profile.owner = request.user
+            profile_form.save()
+            creator_profile = creator_form.save(commit=False)
+            creator_profile.profile_object = profile
+            creator_form.save()
+            return redirect('home')
+            
+        context = {
+            'profile_form': profile_form,
+            'brand_form': creator_form,
+        }
+        
+        return render(request, self.template_name, context)
+    
