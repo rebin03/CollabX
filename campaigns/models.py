@@ -26,7 +26,7 @@ class Campaign(BaseModel):
     brand = models.ForeignKey('accounts.BrandProfile', on_delete=models.CASCADE, related_name='campaign')
     title = models.CharField(max_length=50, null=False, blank=False)
     description = models.TextField()
-    picture = models.ImageField(upload_to='media/campaign_images', null=True, blank=True)
+    picture = models.ImageField(upload_to='campaign_images', null=True, blank=True)
     budget = models.FloatField()
     content_types = models.ManyToManyField(ContentType)
     audience_preferences = models.ManyToManyField(Audience)
