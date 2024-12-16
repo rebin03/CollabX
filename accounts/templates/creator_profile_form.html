@@ -1,0 +1,122 @@
+{% extends 'accounts_base.html' %}
+
+{% block style %}
+<style>
+    body {
+        background-color: #F3F4F6;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<!-- Form Errors -->
+{% if profile_form.errors %}
+<div class="text-red-500">
+    {{ profile_form.errors }}
+</div>
+{% endif %}
+
+<div class="flex bg-gray-100 justify-center items-center min-h-screen px-4 sm:px-6 lg:px-8 my-12 lg:my-16">
+    <div class="bg-white shadow-md rounded-lg w-full max-w-3xl p-6 sm:p-8">
+        <!-- Title -->
+        <h2 class="text-center text-2xl font-semibold text-gray-800 mb-6">Complete your profile to continue</h2>
+
+        <!-- Form Fields -->
+        <form action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <!-- Profile Picture -->
+            <div class="flex justify-center mb-6">
+                <div class="relative w-24 h-24 rounded-full overflow-hidden border-dashed border-2 border-gray-300">
+                    <img id="profile-preview" src="https://via.placeholder.com/150" alt="Profile Picture" class="w-full h-full object-cover">
+                </div>
+            </div>
+            <div class="flex flex-col items-center mb-6">
+                <label for="file-upload" class="cursor-pointer border bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300">
+                    Upload Profile Picture
+                </label>
+                <input id="file-upload" name="profile_picture" type="file" accept="image/*" class="hidden">
+                <span id="file-name" class="mt-2 text-sm text-gray-500">No file chosen</span>
+            </div>
+
+            <!-- Full Name -->
+            <div class="mb-4">
+                <label for="full-name" class="block text-sm font-medium text-gray-700">Full Name<span class="text-red-600">*</span></label>
+                <input id="full-name" name="full_name" type="text" placeholder="Enter your full name" required
+                       class="mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+            </div>
+
+            <!-- Bio -->
+            <div class="mb-4">
+                <label for="bio" class="block text-sm font-medium text-gray-700">Bio<span class="text-red-600">*</span></label>
+                <textarea id="bio" name="bio" rows="3" placeholder="Tell us about yourself" required
+                          class="mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"></textarea>
+            </div>
+
+            <!-- Address -->
+            <div class="mb-4">
+                <label for="address" class="block text-sm font-medium text-gray-700">Address (Optional)</label>
+                <textarea id="address" name="address" rows="2" placeholder="Enter your address"
+                          class="mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"></textarea>
+            </div>
+
+            <!-- Contact Detail -->
+            <div class="mb-4">
+                <label for="contact" class="block text-sm font-medium text-gray-700">Contact Detail (Optional)</label>
+                <input id="contact" name="contact_detail" type="text" placeholder="Enter your contact number"
+                       class="mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+            </div>
+
+            <!-- Engagement Rate -->
+            <div class="mb-4">
+                <label for="engagement-rate" class="block text-sm font-medium text-gray-700">Engagement Rate (%)<span class="text-red-600">*</span></label>
+                <input id="engagement-rate" name="engagement_rate" type="number" step="0.1" placeholder="Enter your engagement rate" required
+                       class="mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+            </div>
+
+            <!-- Niche -->
+            <div class="mb-4">
+                <label for="niche" class="block text-sm font-medium text-gray-700">Niche<span class="text-red-600">*</span></label>
+                <!-- {{ creator_form.niche }} -->
+                <div class="grid grid-cols-4 gap-2">
+                    {% for option in creator_form.niche %}
+                      <div>{{option}}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Platform -->
+            <div class="mb-4">
+                <label for="platform" class="block text-sm font-medium text-gray-700">Platform<span class="text-red-600">*</span></label>
+                <!-- {{ creator_form.platform }} -->
+                <div class="grid grid-cols-3 gap-4">
+                    {% for option in creator_form.platform %}
+                      <div>{{option}}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end">
+                <button type="submit" class="w-full sm:w-auto bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-600">
+                    Continue
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // JavaScript for showing selected file name
+    document.getElementById('file-upload').addEventListener('change', function (event) {
+        const fileName = event.target.files[0] ? event.target.files[0].name : 'No file chosen';
+        document.getElementById('file-name').textContent = fileName;
+
+        // Preview the selected image
+        const fileReader = new FileReader();
+        fileReader.onload = function (e) {
+            document.getElementById('profile-preview').src = e.target.result;
+        };
+        fileReader.readAsDataURL(event.target.files[0]);
+    });
+</script>
+{% endblock %}
