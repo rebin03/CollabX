@@ -14,9 +14,12 @@ class EmailOrPhoneBackend(BaseBackend):
                 return user_object
             else:
                 return None
-        except:
+        except User.DoesNotExist:
             return None
         
     
-    def get_use(self, user_id):
-        return User.objects.get(id=user_id)
+    def get_user(self, user_id):
+        try:
+            return User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return None

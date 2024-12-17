@@ -53,7 +53,7 @@ class BrandSignUpView(View):
             'form': form,
         }
         
-        print('Failed to create brand user!')
+        messages.error(request, 'Invalid types in fields or mismatch in re-entered passwords')
         return render(request, self.template_name, context)
     
     
@@ -114,8 +114,8 @@ class VerifyEmailView(View):
             user_obj.save()
             return redirect('signin')
             
-        except:
-            messages.error(request, 'Invalid OTP')
+        except User.DoesNotExist:
+            messages.error(request, 'Invalid OTP or User does not exist')
             return render(request, self.template_name)
         
         
@@ -142,25 +142,29 @@ class SignInView(View):
             
             user_obj = authenticate(request, username=uname, password=pwd)
             
-            if user_obj:
-                
-                login(request, user_obj)
-                print("User Object Authenticated:", user_obj.is_authenticated)
-                print("Is user authenticated?", request.user.is_authenticated)
-                print("Logged in User:", request.user)
-
-                if user_obj.is_brand:
-                    # Check if the user has a profile
-                    if request.user.has_profile:
-                        return redirect('add-campaign')
-                    else:
-                        return redirect('create-brand-profile')
-                else:
-                    if request.user.has_profile:
-                        return redirect('home')
-                    else:
-                        return redirect('create-creator-profile')
             
+            if user_obj:
+                if user_obj.is_active:
+                    login(request, user_obj)
+                    print("User Object Authenticated:", user_obj.is_authenticated)
+                    print("Is user authenticated?", request.user.is_authenticated)
+                    print("Logged in User:", request.user)
+
+                    if user_obj.is_brand:
+                        # Check if the user has a profile
+                        if request.user.has_profile:
+                            return redirect('add-campaign')
+                        else:
+                            return redirect('create-brand-profile')
+                    else:
+                        if request.user.has_profile:
+                            return redirect('home')
+                        else:
+                            print("Session Key Before:", request.session.session_key)
+                            return redirect('create-creator-profile')
+                
+                messages.error(request, 'Your email is not verified')
+            messages.error(request, 'Invalid credentials')      
         return render(request, self.template_name, {'form':form})
         
         
@@ -219,6 +223,7 @@ class CreatorProfileCreateView(View):
         
         profile_form = self.profile_form_class()
         creator_form = self.creator_form_class()
+        print("Session Key After:", request.session.session_key)
         print(request.user)
         
         context = {
