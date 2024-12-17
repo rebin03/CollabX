@@ -23,7 +23,7 @@ class Audience(BaseModel):
 
 
 class Campaign(BaseModel):
-    brand = models.ForeignKey('accounts.BrandProfile', on_delete=models.CASCADE, related_name='campaign')
+    brand = models.ForeignKey('accounts.BrandProfile', on_delete=models.CASCADE, related_name='campaigns')
     title = models.CharField(max_length=50, null=False, blank=False)
     description = models.TextField()
     picture = models.ImageField(upload_to='campaign_images', null=True, blank=True)
@@ -40,3 +40,22 @@ class Campaign(BaseModel):
     )
     
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Active')
+    
+    
+class Proposal(BaseModel):
+    campaign_object = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='proposals')
+    creator_object = models.ForeignKey('accounts.CreatorProfile', on_delete=models.CASCADE)
+    message = models.TextField(null=True, blank=True)
+    is_interested = models.BooleanField(default=False)
+    
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+        ('working', 'Working'),
+        ('completed', 'Completed'),
+    )
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    submitted_report = models.FileField(upload_to='campaign_reports', null=True, blank=True)
+    remarks = models.TextField(null=True, blank=True)
