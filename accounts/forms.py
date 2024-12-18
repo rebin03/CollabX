@@ -39,7 +39,7 @@ class ProfileForm(forms.ModelForm):
 class CreatorProfileForm(forms.ModelForm):
     class Meta:
         model = CreatorProfile
-        fields = ['niche', 'platform', 'engagement_rate']
+        fields = ['niche', 'platform', 'engagement_rate', 'follower_count']
         
         widgets = {
             'niche': forms.CheckboxSelectMultiple(),

@@ -56,6 +56,7 @@ class CreatorProfile(BaseModel):
     profile_object = models.OneToOneField(Profile, on_delete=models.CASCADE, related_name='creator_profile')
     niche = models.ManyToManyField(Niche)
     platform = models.ManyToManyField(Platform)
+    follower_count = models.FloatField()
     engagement_rate = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     past_collaboration = models.ManyToManyField('campaigns.Campaign')
     

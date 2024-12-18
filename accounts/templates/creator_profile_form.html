@@ -1,13 +1,5 @@
 {% extends 'accounts_base.html' %}
 
-{% block style %}
-<style>
-    body {
-        background-color: #F3F4F6;
-    }
-</style>
-{% endblock %}
-
 {% block main %}
 <!-- Form Errors -->
 {% if profile_form.errors %}
@@ -93,6 +85,13 @@
                       <div>{{option}}</div>
                     {% endfor %}
                 </div>
+            </div>
+
+            <!-- Follower Count -->
+            <div class="mb-4">
+                <label for="follower-count" class="block text-sm font-medium text-gray-700">Follower Count (K)<span class="text-red-600">*</span></label>
+                <input id="follower-count" name="follower_count" type="number" step="0.1" placeholder="Enter followers count in K" required
+                       class="mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
             </div>
 
             <!-- Submit Button -->

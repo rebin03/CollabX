@@ -5,6 +5,7 @@ from django.core.mail import send_mail
 from accounts.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from campaigns.models import Campaign
 
 # Create your views here.
 
@@ -153,7 +154,7 @@ class SignInView(View):
                     if user_obj.is_brand:
                         # Check if the user has a profile
                         if request.user.has_profile:
-                            return redirect('add-campaign')
+                            return redirect('brand-dashboard')
                         else:
                             return redirect('create-brand-profile')
                     else:
@@ -203,7 +204,7 @@ class BrandProfileCreateView(View):
             brand_profile = brand_form.save(commit=False)
             brand_profile.profile_object = profile
             brand_form.save()
-            return redirect('home')
+            return redirect('brand-dashboard')
             
         context = {
             'profile_form': profile_form,
@@ -258,4 +259,49 @@ class CreatorProfileCreateView(View):
         }
         
         return render(request, self.template_name, context)
+
     
+class CreatorListView(View):
+    
+    template_name = 'creators_list.html'
+
+    def get(self, request, *args, **kwargs):
+        
+        qs = User.objects.filter(is_brand=0, is_staff=0)
+        
+        context = {
+            'creators': qs
+        }
+        
+        return render(request, self.template_name, context)
+    
+    
+class CreatorDetailView(View):
+    
+    template_name = 'creator_detail.html'
+    
+    def get(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        qs = User.objects.get(id=id)
+        
+        context = {
+            'creator':qs
+        }
+        
+        return render(request, self.template_name, context)
+    
+    
+class CampaignListView(View):
+    
+    template_name = 'campaign_list.html'
+
+    def get(self, request, *args, **kwargs):
+        
+        qs = Campaign.objects.all()
+        
+        context = {
+            'campaigns':qs
+        }
+        
+        return render(request, self.template_name, context)

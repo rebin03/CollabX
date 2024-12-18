@@ -1,0 +1,233 @@
+{% extends 'accounts_base.html' %}
+
+{% block style %}
+<style>
+    /* Hide default appearance of range slider */
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #A855F7; /* Pink color */
+      border-radius: 50%;
+      cursor: pointer;
+    }
+  
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: #A855F7;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+  
+    input[type="range"]::-ms-thumb {
+      width: 16px;
+      height: 16px;
+      background: #A855F7;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="flex relative">
+    <!-- Sidebar (Filters Section) -->
+    <div id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-white border-r p-6 border-gray-300 z-50 transform -translate-x-full transition-transform duration-300 sm:translate-x-0 sm:w-1/4">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold text-gray-800">Filters</h2>
+        <button class="text-sm text-purple-700 font-medium hover:underline">Clear All</button>
+        <button id="close-sidebar" class="text-gray-500 text-xl sm:hidden">&times;</button>
+      </div>
+
+      <!-- Search Filter -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+        <div class="relative">
+          <input type="text" placeholder="Search campaigns..." class="w-full p-2 pr-10 border rounded-md focus:ring-purple-500 focus:border-purple-500">
+          <button class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-purple-600">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters: Brand Type, Content Type, Audience, Budget -->
+      <div class="space-y-6">
+        <!-- Brand Type Filter -->
+        <div>
+          <h3 class="text-sm font-semibold text-gray-700 mb-4 uppercase border-b">Brand Type</h3>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">E-commerce</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Fashion</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Tech</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Lifestyle</span>
+          </label>
+        </div>
+
+        <!-- Content Type Filter -->
+        <div>
+          <h3 class="text-sm font-semibold text-gray-700 mb-4 uppercase border-b">Content Type</h3>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Video</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Image</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Blog</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Story</span>
+          </label>
+        </div>
+
+        <!-- Audience Filter -->
+        <div>
+          <h3 class="text-sm font-semibold text-gray-700 mb-4 uppercase border-b">Audience</h3>
+          <label class="flex items-center text-gray-600">
+            <input type="radio" name="audience" class="form-radio accent-purple-500">
+            <span class="ml-2">10K-50K</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="radio" name="audience" class="form-radio accent-purple-500">
+            <span class="ml-2">50K-200K</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="radio" name="audience" class="form-radio accent-purple-500">
+            <span class="ml-2">200K-1M</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="radio" name="audience" class="form-radio accent-purple-500">
+            <span class="ml-2">1M+</span>
+          </label>
+        </div>
+
+        <!-- Budget Filter -->
+        <div>
+            <h3 class="text-sm font-semibold text-gray-700 mb-4 uppercase border-b">Budget</h3>
+            <!-- Slider Container -->
+            <div class="relative">
+              <input 
+                type="range" 
+                id="budget-slider" 
+                min="1000" 
+                max="100000" 
+                step="500" 
+                value="1000" 
+                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pink-500"
+              />
+              <!-- Display Selected Value -->
+              <p class="text-sm mt-2 text-gray-600">
+                <span id="min-budget">₹1000</span> - 
+                <span id="max-budget">₹10,0000</span>
+              </p>
+            </div>
+          </div>
+          
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content" class="flex-1 p-6 ml-0 sm:ml-[25%]">
+      <button id="open-sidebar" class="sm:hidden bg-purple-500 text-white py-2 px-4 rounded-lg mb-4">
+        Show Filters
+      </button>
+
+      <h1 class="text-3xl font-semibold text-gray-800 mb-6">Browse Campaigns</h1>
+
+      <!-- Campaign Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for campaign in campaigns %}
+            <!-- Campaign Card -->
+            <div class="max-w-sm rounded-lg overflow-hidden bg-white shadow-lg">
+                <!-- Image -->
+                <div class="relative">
+                <img
+                    class="h-60 w-full object-cover"
+                    src="{{campaign.picture.url}}" 
+                    alt="Campaign Image"
+                />
+                </div>
+                <!-- Content Section -->
+                <div class="p-5">
+                <h2 class="text-2xl font-bold text-gray-800 mb-1">
+                    {{campaign.title}}
+                </h2>
+                <p class="text-sm text-gray-500 mb-4">by {{campaign.brand.brand_name}}</p>
+                <!-- <p class="text-gray-700 mb-4">
+                    Looking for fashion influencers to promote our summer collection.
+                </p> -->
+                <!-- Tags -->
+                <div class="flex space-x-2 mb-4">
+                    {% for content_type in campaign.content_types.all %}
+                    <span class="bg-gray-200 text-gray-700 text-xs font-semibold px-3 py-1 rounded-full">
+                        {{content_type}}
+                    </span>
+                    {% endfor %}
+                </div>
+                <!-- Budget -->
+                <p class="text-gray-800 font-semibold mb-4">
+                    Budget: <span class="font-bold">₹{{campaign.budget | floatformat:0}}</span>
+                </p>
+                <!-- View Details Button -->
+                <a
+                    href="#"
+                    class="block text-center bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 rounded-lg"
+                >
+                    View Details
+                </a>
+                </div>
+            </div>
+        {% endfor %}
+      </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+  <!-- JavaScript for Sidebar -->
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const openSidebar = document.getElementById('open-sidebar');
+    const closeSidebar = document.getElementById('close-sidebar');
+
+    openSidebar.addEventListener('click', () => {
+      sidebar.classList.remove('-translate-x-full');
+    });
+
+    closeSidebar.addEventListener('click', () => {
+      sidebar.classList.add('-translate-x-full');
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!sidebar.contains(e.target) && e.target !== openSidebar) {
+          sidebar.classList.add('-translate-x-full');
+        }
+    });
+
+    // for slider
+    const budgetSlider = document.getElementById("budget-slider");
+    const minBudgetDisplay = document.getElementById("min-budget");
+    const maxBudgetDisplay = document.getElementById("max-budget");
+  
+    budgetSlider.addEventListener("input", (e) => {
+      const value = parseInt(e.target.value);
+      minBudgetDisplay.textContent = `₹${value}`;
+    });
+  </script>
+{% endblock %}

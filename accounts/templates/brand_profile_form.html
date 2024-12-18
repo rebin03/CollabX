@@ -1,12 +1,5 @@
 {% extends 'accounts_base.html' %}
 
-{% block style %}
-<style>
-    body{
-        background-color: #F3F4F6;
-    }
-</style>
-{% endblock %}
 
 {% block main %}
 <!-- Profile Form Errors -->
@@ -41,7 +34,7 @@
         <!-- Upload Button -->
         <div class="flex flex-col items-center mb-6">
           <label for="file-upload" class="cursor-pointer border bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300">
-            Choose File
+            Upload Logo
           </label>
           <input id="file-upload" name="profile_picture" type="file" accept="image/*" class="hidden">
           <span id="file-name" class="mt-2 text-sm text-gray-500">No file chosen</span>
@@ -80,7 +73,7 @@
 
         <!-- Address -->
         <div class="mb-4">
-          <label for="address" class="block text-sm font-medium text-gray-700">Address<span class="text-red-600">*</span></label>
+          <label for="address" class="block text-sm font-medium text-gray-700">Address (Optional)</label>
           <textarea id="address" name="address" rows="2" placeholder="Enter your company address" class="mt-1 p-2 border block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"></textarea>
         </div>
 

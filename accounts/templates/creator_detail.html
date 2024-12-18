@@ -1,0 +1,80 @@
+{% extends 'accounts_base.html' %}
+
+{% block main %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- Profile Header -->
+    <div class="flex flex-col items-center bg-white rounded-lg shadow-md p-6 md:flex-row md:items-start md:p-8">
+        <!-- Profile Image -->
+        <img src="{{creator.profile.profile_picture.url}}" alt="Profile" class="w-28 h-28 rounded-full object-cover mb-4 md:mb-0 md:mr-6">
+
+        <!-- Details -->
+        <div class="text-center md:text-left flex-1">
+            <h1 class="text-2xl font-bold text-gray-900">{{creator.profile.full_name}}</h1>
+            <p class="text-gray-500 text-sm">@{{creator.username}}</p>
+            <p class="mt-2 text-gray-700 text-sm">
+                {{creator.profile.bio}}
+            </p>
+
+            <!-- Tags -->
+            <div class="flex flex-wrap justify-center md:justify-start gap-2 mt-4">
+                {% for niche in creator.profile.creator_profile.niche.all %}
+                <span class="bg-purple-200 text-purple-800 text-xs px-2 py-1 rounded">{{niche}}</span>
+                {% endfor %}
+            </div>
+
+            <!-- Contact -->
+            <div class="flex flex-col items-center md:items-start mt-4 text-sm text-gray-600">
+                <p><span class="font-semibold">📍</span> New York, USA</p>
+                <p><span class="font-semibold">📧</span> contact@sarahjohnson.com</p>
+                <p><span class="font-semibold">🌐</span> www.sarahjohnson.com</p>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex flex-col md:flex-row items-center gap-3 mt-6 md:mt-0">
+            <button class="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded flex items-center gap-1">
+                <span>💜</span> Show Interest
+            </button>
+            <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm px-4 py-2 rounded flex items-center gap-1">
+                <span>🔔</span> Give Campaign Updates
+            </button>
+        </div>
+    </div>
+
+    <!-- Platform Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+        {% for platform in creator.profile.creator_profile.platform.all %}
+        <div class="bg-white rounded-lg shadow p-4 text-center">
+            <p class="font-semibold text-gray-700">{{platform}}</p>
+            <p class="text-xl font-bold text-gray-900">500K</p>
+            <p class="text-sm text-gray-500">4.5% Engagement</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Past Collaborations -->
+    <div class="mt-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Past Collaborations</h2>
+
+        <!-- Collaboration Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Card 1 -->
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="font-bold text-gray-900">EcoStyle</h3>
+                <p class="text-purple-600 text-sm font-semibold">Summer Collection 2023</p>
+                <p class="text-gray-700 text-sm mt-2">Sustainable fashion campaign featuring recycled materials.</p>
+                <p class="text-gray-500 text-xs mt-2">Engagement: 5.2% | Aug 2023</p>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="font-bold text-gray-900">GreenBeauty</h3>
+                <p class="text-purple-600 text-sm font-semibold">Natural Skincare Launch</p>
+                <p class="text-gray-700 text-sm mt-2">Product launch campaign for organic skincare line.</p>
+                <p class="text-gray-500 text-xs mt-2">Engagement: 4.8% | Oct 2023</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

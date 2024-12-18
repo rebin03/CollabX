@@ -1,0 +1,145 @@
+{% extends 'accounts_base.html' %}
+
+{% block main %}
+
+<div class="flex relative">
+    <!-- Sidebar (Initially Hidden on Small Screens) -->
+    <div id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-white border-r p-6 border-gray-300 z-50 transform -translate-x-full transition-transform duration-300 sm:translate-x-0 sm:w-1/4">
+        <div class="flex justify-between items-center mb-4 sm:flex-row sm:items-center">
+            <h2 class="text-lg font-semibold text-gray-800">Filters</h2>
+            <button class="text-sm text-purple-700 font-medium hover:underline sm:ml-auto">
+              Clear All
+            </button>
+            <button id="close-sidebar" class="text-gray-500 text-xl sm:hidden">&times;</button>
+        </div>
+
+      <!-- Search -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+        <div class="relative">
+          <input type="text" placeholder="Search influencers..." class="w-full p-2 pr-10 border rounded-md focus:ring-purple-500 focus:border-purple-500">
+          <button class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-purple-600">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Categories, Followers, Platform Filters -->
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide border-b">Categories</h3>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Lifestyle</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Tech</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Fashion</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Food</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Travel</span>
+          </label>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide border-b">Followers</h3>
+          <label class="flex items-center text-gray-600">
+            <input type="radio" name="followers" class="form-radio accent-purple-500">
+            <span class="ml-2">0-50K</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="radio" name="followers" class="form-radio accent-purple-500">
+            <span class="ml-2">50k-100K</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="radio" name="followers" class="form-radio accent-purple-500">
+            <span class="ml-2">100-500K</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="radio" name="followers" class="form-radio accent-purple-500">
+            <span class="ml-2">500K+</span>
+          </label>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide border-b">Platform</h3>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">YouTube</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Instagram</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">Twitter</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">TikTok</span>
+          </label>
+          <label class="flex items-center text-gray-600">
+            <input type="checkbox" class="form-checkbox accent-purple-500">
+            <span class="ml-2">LinkedIn</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content" class="flex-1 p-6 ml-0 sm:ml-[25%]">
+      <button id="open-sidebar" class="sm:hidden bg-purple-500 text-white py-2 px-4 rounded-lg mb-4">
+        Show Filters
+      </button>
+
+      <h1 class="text-3xl font-semibold text-gray-800 mb-6">Browse Influencers</h1>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for creator in creators %}
+        <!-- Influencer Card -->
+        <div class="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4 hover:bg-purple-50">
+            <img src="{{creator.profile.profile_picture.url}}" alt="Sarah Johnson" class="w-20 h-20 rounded-full">
+            <div>
+              <h2 class="text-lg font-semibold text-gray-800">{{creator.profile.full_name}}</h2>
+              <p class="text-sm text-gray-500">Engagement: {{creator.profile.creator_profile.engagement_rate | floatformat:1}}%</p>
+              <p class="text-sm text-gray-600 mb-2">Followers: <span class="font-medium">{{creator.profile.creator_profile.follower_count | floatformat:0}}K</span></p>
+              <a href="{% url 'creator-detail' creator.id %}" class="bg-purple-500 text-white py-1 px-3 rounded-lg text-sm hover:bg-purple-600 cursor-pointer">View Profile</a>
+            </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<!-- Script for sidebar -->
+<script>
+    const sidebar = document.getElementById('sidebar');
+    const openSidebar = document.getElementById('open-sidebar');
+    const closeSidebar = document.getElementById('close-sidebar');
+    const content = document.getElementById("content");
+
+    openSidebar.addEventListener('click', () => {
+      sidebar.classList.remove('-translate-x-full');
+    });
+
+    closeSidebar.addEventListener('click', () => {
+      sidebar.classList.add('-translate-x-full');
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!sidebar.contains(e.target) && e.target !== openSidebar) {
+          sidebar.classList.add('-translate-x-full');
+        }
+      });
+  </script>
+{% endblock %}
