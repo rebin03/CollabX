@@ -10,5 +10,4 @@ urlpatterns = [
     path('signin/', views.SignInView.as_view(), name='signin'),
     path('creator/all/', views.CreatorListView.as_view(), name='creator-list'),
     path('creator/<int:pk>/', views.CreatorDetailView.as_view(), name='creator-detail'),
-    path('campaign/all/', views.CampaignListView.as_view(), name='campaign-list'),
 ]

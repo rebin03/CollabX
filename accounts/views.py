@@ -5,7 +5,6 @@ from django.core.mail import send_mail
 from accounts.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from campaigns.models import Campaign
 
 # Create your views here.
 
@@ -287,21 +286,6 @@ class CreatorDetailView(View):
         
         context = {
             'creator':qs
-        }
-        
-        return render(request, self.template_name, context)
-    
-    
-class CampaignListView(View):
-    
-    template_name = 'campaign_list.html'
-
-    def get(self, request, *args, **kwargs):
-        
-        qs = Campaign.objects.all()
-        
-        context = {
-            'campaigns':qs
         }
         
         return render(request, self.template_name, context)

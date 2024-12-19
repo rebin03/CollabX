@@ -1,0 +1,97 @@
+{% extends 'campaigns_base.html' %}
+
+{% block style %}
+<style>
+    body {
+        background-color: #F3F4F6;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Back to Campaigns -->
+    <div class="mb-6">
+      <a href="{% url 'campaign-list' %}" class="text-gray-500 text-sm font-medium hover:text-gray-700">
+        &larr; Back to Campaigns
+      </a>
+    </div>
+
+    <!-- Campaign Details -->
+    <div class="overflow-hidden">
+      <!-- Campaign Image -->
+      <div>
+        <img
+          src="{{campaign.picture.url}}" 
+          alt="Campaign Image"
+          class="w-full h-96 object-cover rounded-lg"
+        />
+      </div>
+
+      <!-- Campaign Content -->
+      <div class="p-6">
+        <h1 class="text-3xl font-bold mb-1 mt-2">{{campaign.title}}</h1>
+        <p class="text-gray-500 mb-4 mt-3">by <span class="font-medium text-gray-700">{{campaign.brand.brand_name}}</span></p>
+
+        <!-- Tags -->
+        <div class="flex space-x-2 mb-6">
+            {% for content_type in campaign.content_types.all %}
+                <span class="text-xs font-semibold bg-purple-200 px-3 py-1 rounded-full">{{content_type}}</span>
+            {% endfor %}
+        </div>
+
+        <!-- Description -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Section: Description -->
+            <div>
+                <h2 class="text-2xl font-semibold mb-2">Description</h2>
+                <p class="text-sm text-gray-700 mb-6">
+                    {{campaign.description}}
+                </p>
+            </div>
+
+            <!-- Right Section: Details Grid -->
+            <div>
+                <div class="mb-4">
+                    <h3 class="text-l font-semibold text-gray-700 mb-2">Target Audience</h3>
+                    <div class="flex space-x-2">
+                        {% for audience in campaign.audience_preferences.all %}
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full border border-gray-300">{{audience}}</span>
+                        {% endfor %}
+                    </div>
+                    <!-- <p class="text-sm text-gray-600">Gen Z, Millennials</p> -->
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-l font-semibold text-gray-700 mb-1">Budget</h3>
+                    <p class="text-sm text-gray-600">₹{{campaign.budget | floatformat:0}}</p>
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-l font-semibold text-gray-700 mb-1">Region</h3>
+                    <p class="text-sm text-gray-600">{{campaign.region}}</p>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Requirements -->
+        <div class="mt-6">
+          <h2 class="text-xl font-semibold mb-2">Requirements</h2>
+          <p class="text-sm text-gray-700">
+            {{campaign.requirements}}
+          </p>
+        </div>
+
+        <!-- Submit Proposal Button -->
+        <div class="mt-8">
+          <a
+            class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 rounded-lg shadow-md focus:outline-none p-3"
+          >
+          <i class="fa-regular fa-paper-plane me-1"></i> Submit Proposal
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

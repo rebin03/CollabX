@@ -1,6 +1,7 @@
 from django.shortcuts import redirect, render
 from django.views.generic import View
 from campaigns.forms import CampaignForm
+from campaigns.models import Campaign
 
 # Create your views here.
 
@@ -60,4 +61,35 @@ class CreateCampaignView(View):
             'form':form
         }
         
+        return render(request, self.template_name, context)
+    
+    
+class CampaignListView(View):
+    
+    template_name = 'campaign_list.html'
+
+    def get(self, request, *args, **kwargs):
+        
+        qs = Campaign.objects.all()
+        
+        context = {
+            'campaigns':qs
+        }
+        
+        return render(request, self.template_name, context)
+
+
+class CampaignDetailView(View):
+    
+    template_name = 'campaign_detail.html'
+
+    def get(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        qs = Campaign.objects.get(id=id)
+        
+        context = {
+            'campaign':qs
+        }
+
         return render(request, self.template_name, context)
