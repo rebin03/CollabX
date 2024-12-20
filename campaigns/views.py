@@ -93,3 +93,12 @@ class CampaignDetailView(View):
         }
 
         return render(request, self.template_name, context)
+    
+    
+class CreatorDashbaordView(View):
+    
+    template_name = 'creator_dashboard.html'
+
+    def get(self, request, *args, **kwargs):
+        
+        return render(request, self.template_name)

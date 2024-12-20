@@ -1,0 +1,125 @@
+{% extends 'campaigns_base.html' %}
+
+{% block style %}
+<style>
+    body {
+        background-color: #F3F4F6;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="container mx-auto px-4 py-8 text-gray-900">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
+      <h1 class="text-2xl font-semibold text-center sm:text-left mb-4 sm:mb-0">Creator Dashboard</h1>
+      <button class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 flex items-center justify-center sm:justify-start">
+        <i class="fa-solid fa-magnifying-glass me-2"></i> Browse Campaigns
+      </button>
+    </div>
+
+  
+    <!-- Stats Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-medium text-gray-700">Active Campaigns</h2>
+        <p class="text-2xl font-bold mt-2">3</p>
+      </div>
+      <div class="bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-medium text-gray-700">Pending Proposals</h2>
+        <p class="text-2xl font-bold mt-2">5</p>
+      </div>
+      <div class="bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-medium text-gray-700">Rating</h2>
+        <p class="text-2xl font-bold mt-2">4.8</p>
+      </div>
+      <!-- <div class="bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-medium text-gray-700">Total Campaigns</h2>
+        <p class="text-2xl font-bold mt-2">12</p>
+      </div> -->
+    </div>
+  
+    <!-- Active Campaigns Section -->
+    <div class="mb-6">
+      <h2 class="text-xl font-semibold mb-4">Active Campaigns</h2>
+      <div class="bg-white p-2 rounded shadow mb-2">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border border-2 rounded p-4 gap-4">
+          <!-- Content -->
+          <div>
+            <h3 class="text-lg font-semibold">Summer Collection Launch</h3>
+            <p class="text-sm text-gray-600">Brand: Fashion Co.</p>
+            <p class="text-sm text-gray-600">Deadline: 4/15/2024</p>
+            <p class="text-sm text-gray-600">Status: In Progress</p>
+          </div>
+      
+          <!-- Button -->
+          <div class="sm:self-start self-end">
+            <button 
+              class="border border-slate-400 text-primary px-4 py-2 rounded hover:bg-slate-100 flex items-center">
+              <i class="fa-regular fa-file-lines me-2"></i> Submit Report
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white p-2 rounded shadow mb-2">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border border-2 rounded p-4 gap-4">
+          <!-- Content -->
+          <div>
+            <h3 class="text-lg font-semibold">Tech Gadget Review</h3>
+            <p class="text-sm text-gray-600">Brand: TechWorld</p>
+            <p class="text-sm text-gray-600">Deadline: 4/20/2024</p>
+            <p class="text-sm text-gray-600">Status: Content Due</p>
+          </div>
+      
+          <!-- Button -->
+          <div class="sm:self-start self-end">
+            <button 
+              class="border border-slate-400 text-primary px-4 py-2 rounded hover:bg-slate-100 flex items-center">
+              <i class="fa-regular fa-file-lines me-2"></i> Submit Report
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Notifications and Requested Campaigns -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Notifications -->
+      <div>
+        <h2 class="text-xl font-semibold mb-4">Notifications</h2>
+        <div class="bg-white p-4 rounded shadow mb-4">
+          <p class="text-sm text-green-600">✔ Campaign accepted: Summer Collection Launch</p>
+          <p class="text-sm text-gray-600">3/20/2024</p>
+        </div>
+        <div class="bg-white p-4 rounded shadow mb-4">
+          <p class="text-sm text-red-600">✖ Campaign rejected: Tech Review Series</p>
+          <p class="text-sm text-gray-600">3/19/2024</p>
+        </div>
+        <div class="bg-white p-4 rounded shadow">
+          <p class="text-sm text-green-600">✔ Campaign accepted: Fitness Challenge</p>
+          <p class="text-sm text-gray-600">3/18/2024</p>
+        </div>
+      </div>
+  
+      <!-- Requested Campaigns -->
+      <div>
+        <h2 class="text-xl font-semibold mb-4">Requested Campaigns</h2>
+        <div class="bg-white p-4 rounded shadow mb-4">
+          <p class="font-medium">Summer Co.</p>
+          <p class="text-sm text-gray-600">Campaign: Summer Collection Launch</p>
+          <p class="text-sm text-yellow-600">Status: Pending</p>
+        </div>
+        <div class="bg-white p-4 rounded shadow mb-4">
+          <p class="font-medium">Tech Reviews</p>
+          <p class="text-sm text-gray-600">Campaign: Tech Review Series</p>
+          <p class="text-sm text-green-600">Status: Accepted</p>
+        </div>
+        <div class="bg-white p-4 rounded shadow">
+          <p class="font-medium">Lifestyle Blog</p>
+          <p class="text-sm text-gray-600">Campaign: Lifestyle Blog Series</p>
+          <p class="text-sm text-red-600">Status: Rejected</p>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}
