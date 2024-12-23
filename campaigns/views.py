@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render
 from django.views.generic import View
 from campaigns.forms import CampaignForm
-from campaigns.models import Campaign
+from campaigns.models import Campaign, Proposal
 
 # Create your views here.
 
@@ -102,3 +102,39 @@ class CreatorDashbaordView(View):
     def get(self, request, *args, **kwargs):
         
         return render(request, self.template_name)
+    
+
+
+class SubmitProposalView(View):
+    def post(self, request, *args, **kwargs):
+        campaign_id = kwargs.get('campaign_id')
+        campaign = Campaign.objects.get(id=campaign_id)
+        creator = request.user.profile.creator_profile
+        message = request.POST.get('message')
+        
+        proposal = Proposal.objects.create(
+            campaign=campaign,
+            creator=creator,
+            message=message,
+            is_interested=True,
+            status='pending'
+        )
+        return redirect('campaign-detail', pk=campaign_id)
+
+
+class AcceptProposalView(View):
+    def post(self, request, *args, **kwargs):
+        proposal_id = kwargs.get('proposal_id')
+        proposal = Proposal.objects.get(id=proposal_id)
+        proposal.status = 'accepted'
+        proposal.save()
+        return redirect('campaign-detail', pk=proposal.campaign.id)
+
+
+class RejectProposalView(View):
+    def post(self, request, *args, **kwargs):
+        proposal_id = kwargs.get('proposal_id')
+        proposal = Proposal.objects.get(id=proposal_id)
+        proposal.status = 'rejected'
+        proposal.save()
+        return redirect('campaign-detail', pk=proposal.campaign.id)
