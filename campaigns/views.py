@@ -87,9 +87,11 @@ class CampaignDetailView(View):
         
         id = kwargs.get('pk')
         qs = Campaign.objects.get(id=id)
+        user_proposal = Proposal.objects.filter(campaign_object=qs, creator_object=request.user.profile.creator_profile).first()
         
         context = {
-            'campaign':qs
+            'campaign':qs,
+            'user_proposal': user_proposal,
         }
 
         return render(request, self.template_name, context)
@@ -106,35 +108,51 @@ class CreatorDashbaordView(View):
 
 
 class SubmitProposalView(View):
+    
     def post(self, request, *args, **kwargs):
-        campaign_id = kwargs.get('campaign_id')
-        campaign = Campaign.objects.get(id=campaign_id)
+        
+        id = kwargs.get('pk')
+        campaign = Campaign.objects.get(id=id)
         creator = request.user.profile.creator_profile
         message = request.POST.get('message')
         
         proposal = Proposal.objects.create(
-            campaign=campaign,
-            creator=creator,
+            campaign_object=campaign,
+            creator_object=creator,
             message=message,
             is_interested=True,
             status='pending'
         )
-        return redirect('campaign-detail', pk=campaign_id)
+        return redirect('campaign-detail', pk=id)
+
+
+class CancelProposalView(View):
+    
+    def post(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        proposal = Proposal.objects.get(id=id)
+        proposal.delete()
+        return redirect('campaign-detail', pk=proposal.campaign_object.id)
 
 
 class AcceptProposalView(View):
+    
     def post(self, request, *args, **kwargs):
-        proposal_id = kwargs.get('proposal_id')
-        proposal = Proposal.objects.get(id=proposal_id)
+        
+        id = kwargs.get('id')
+        proposal = Proposal.objects.get(id=id)
         proposal.status = 'accepted'
         proposal.save()
         return redirect('campaign-detail', pk=proposal.campaign.id)
 
 
 class RejectProposalView(View):
+    
     def post(self, request, *args, **kwargs):
-        proposal_id = kwargs.get('proposal_id')
-        proposal = Proposal.objects.get(id=proposal_id)
+        
+        id = kwargs.get('id')
+        proposal = Proposal.objects.get(id=id)
         proposal.status = 'rejected'
         proposal.save()
         return redirect('campaign-detail', pk=proposal.campaign.id)
