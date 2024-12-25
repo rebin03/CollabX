@@ -8,6 +8,7 @@ urlpatterns = [
     path('creator/profile/add/', views.CreatorProfileCreateView.as_view(), name='create-creator-profile'),
     path('verify/email/', views.VerifyEmailView.as_view(), name='verify-email'),
     path('signin/', views.SignInView.as_view(), name='signin'),
+    path('signout/', views.SignOutView.as_view(), name='signout'),
     path('creator/all/', views.CreatorListView.as_view(), name='creator-list'),
     path('creator/<int:pk>/', views.CreatorDetailView.as_view(), name='creator-detail'),
 ]

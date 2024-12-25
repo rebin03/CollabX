@@ -56,10 +56,16 @@ class CreatorProfile(BaseModel):
     profile_object = models.OneToOneField(Profile, on_delete=models.CASCADE, related_name='creator_profile')
     niche = models.ManyToManyField(Niche)
     platform = models.ManyToManyField(Platform)
-    follower_count = models.FloatField()
+    follower_count = models.FloatField(null=True, blank=True)
     engagement_rate = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     past_collaboration = models.ManyToManyField('campaigns.Campaign')
-    
+
+
+class PlatformFollowerCount(BaseModel):
+    creator_profile = models.ForeignKey(CreatorProfile, on_delete=models.CASCADE)
+    platform_object = models.ForeignKey(Platform, on_delete=models.CASCADE)
+    follower_count = models.IntegerField()
+
 
 class BrandType(BaseModel):
     name = models.CharField(max_length=100, unique=True)

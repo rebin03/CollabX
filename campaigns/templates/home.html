@@ -27,17 +27,40 @@
         <i class="fas fa-bars text-xl"></i>
       </button>
       <!-- Navigation Links -->
-      <div id="menu" class="hidden md:flex space-x-6">
-        <a href="#" class="text-gray-600 hover:text-purple-500 font-medium">Solutions</a>
-        <a href="#" class="text-gray-600 hover:text-purple-500 font-medium">Pricing</a>
-        <a href="#" class="text-gray-600 hover:text-purple-500 font-medium">About</a>
+      <div id="menu" class="hidden md:flex space-x-6 items-center">
+        {% if user.is_authenticated %}
+          {% if user.is_brand %}
+            <a href="{% url 'brand-dashboard' %}" class="text-gray-600 hover:text-purple-500 font-medium">Dashboard</a>
+          {% else %}
+            <a href="{% url 'creator-dashboard' %}" class="text-gray-600 hover:text-purple-500 font-medium">Dashboard</a>
+          {% endif %}
+          <div class="relative">
+            <button id="profile-button" class="text-gray-600 hover:text-purple-500 focus:outline-none">
+              <i class="fas fa-user-circle text-2xl"></i>
+            </button>
+            <div id="profile-menu" class="hidden absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg py-2">
+              <a href="" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a>
+              <a href="{% url 'signout' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
+            </div>
+          </div>
+        {% else %}
+          <a href="{% url 'signin' %}" class="text-gray-600 hover:text-purple-500 font-medium">Sign In</a>
+        {% endif %}
       </div>
     </div>
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="hidden bg-white shadow-md md:hidden">
-      <a href="#" class="block py-2 px-4 text-gray-600 hover:text-purple-500 font-medium">Solutions</a>
-      <a href="#" class="block py-2 px-4 text-gray-600 hover:text-purple-500 font-medium">Pricing</a>
-      <a href="#" class="block py-2 px-4 text-gray-600 hover:text-purple-500 font-medium">About</a>
+      {% if user.is_authenticated %}
+        {% if user.is_brand %}
+          <a href="{% url 'brand-dashboard' %}" class="block py-2 px-4 text-gray-600 hover:text-purple-500 font-medium">Dashboard</a>
+        {% else %}
+          <a href="{% url 'creator-dashboard' %}" class="block py-2 px-4 text-gray-600 hover:text-purple-500 font-medium">Dashboard</a>
+        {% endif %}
+        <a href="" class="block py-2 px-4 text-gray-600 hover:text-purple-500 font-medium">Profile</a>
+        <a href="{% url 'signout' %}" class="block py-2 px-4 text-gray-600 hover:text-purple-500 font-medium">Logout</a>
+      {% else %}
+        <a href="{% url 'signin' %}" class="block py-2 px-4 text-gray-600 hover:text-purple-500 font-medium">Sign In</a>
+      {% endif %}
     </div>
   </nav>
 
@@ -53,14 +76,26 @@
       <p class="text-base sm:text-lg md:text-xl lg:text-2xl text-center text-gray-600 mb-8 sm:mb-12">
         The smart way to discover, collaborate, and grow your influence marketing campaigns
       </p>
+      {% if not user.is_authenticated %}
       <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-        <button class="bg-purple-500 text-white font-medium py-2 px-6 sm:px-8 rounded-lg hover:bg-purple-400 w-full sm:w-auto">
+        <a href="{% url 'brand-signup' %}" class="bg-purple-500 text-white font-medium py-2 px-6 sm:px-8 rounded-lg hover:bg-purple-400 w-full sm:w-auto">
           I'm a Brand
-        </button>
-        <button class="bg-white text-primary border font-medium py-2 px-6 sm:px-8 rounded-lg hover:bg-purple-500 hover:text-white w-full sm:w-auto">
-          I'm an Creator
-        </button>
+        </a>
+        <a href="{% url 'creator-signup' %}" class="bg-white text-primary border font-medium py-2 px-6 sm:px-8 rounded-lg hover:bg-purple-500 hover:text-white w-full sm:w-auto">
+          I'm a Creator
+        </a>
       </div>
+      {% else %}
+        {% if user.is_brand %}
+        <a href="{% url 'create-campaign' %}" class="bg-purple-500 text-white font-medium py-2 px-6 sm:px-8 rounded-lg hover:bg-purple-400">
+          Add Campaign
+        </a>
+        {% else %}
+        <a href="{% url 'campaign-list' %}" class="bg-purple-500 text-white font-medium py-2 px-6 sm:px-8 rounded-lg hover:bg-purple-400">
+          Explore Campaigns
+        </a>
+        {% endif %}
+      {% endif %}
     </div>
   </section>
   
@@ -207,12 +242,28 @@
   
 </body>
 <script>
-    const menuButton = document.getElementById('menu-button');
-    const menu = document.getElementById('menu');
-    const mobileMenu = document.getElementById('mobile-menu');
+  const menuButton = document.getElementById('menu-button');
+  const menu = document.getElementById('menu');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const profileButton = document.getElementById('profile-button');
+  const profileMenu = document.getElementById('profile-menu');
 
-    menuButton.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
-    });
-  </script>
+  menuButton.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
+
+  profileButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    profileMenu.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (event) => {
+    const isClickInsideProfileMenu = profileMenu.contains(event.target);
+    const isClickInsideProfileButton = profileButton.contains(event.target);
+
+    if (!isClickInsideProfileMenu && !isClickInsideProfileButton) {
+      profileMenu.classList.add('hidden');
+    }
+  });
+</script>
 </html>

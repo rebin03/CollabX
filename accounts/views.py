@@ -167,6 +167,14 @@ class SignInView(View):
             messages.error(request, 'Invalid credentials')      
         return render(request, self.template_name, {'form':form})
         
+ 
+class SignOutView(View):
+    
+    def get(self, request, *args, **kwargs):
+        
+        logout(request)    
+        return redirect('home')
+ 
         
 class BrandProfileCreateView(View):
     
