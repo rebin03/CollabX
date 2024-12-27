@@ -86,7 +86,7 @@
         <div class="mt-8">
           {% if user_proposal %}
             <div class="bg-gray-100 py-4 rounded-lg">
-              <h3 class="text-lg font-semibold mb-2">Your Submitted Proposal</h3>
+              <h3 class="text-lg font-semibold mb-2">Proposal Submitted</h3>
               <p class="text-sm text-gray-700">{{ user_proposal.message }}</p>
               <p class="text-sm text-gray-500 mt-2">Status: {{ user_proposal.get_status_display }}</p>
               <form action="{% url 'cancel-proposal' user_proposal.id %}" method="POST" class="mt-4">

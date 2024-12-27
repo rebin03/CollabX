@@ -39,7 +39,8 @@ class Campaign(BaseModel):
     STATUS_CHOICES = (
         ('active', 'Active'),
         ('completed', 'Completed'),
-        ('close', 'Closed'),
+        ('pending', 'Pending'),
+        ('closed', 'Closed'),
     )
     
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Active')
@@ -92,12 +93,3 @@ class Rating(models.Model):
 
     def __str__(self):
         return f"Rating for {self.proposal} - {self.rating}"
-    
-
-
-class EscrowTransaction(models.Model):
-    proposal = models.OneToOneField(Proposal, on_delete=models.CASCADE, related_name='escrow_transaction')
-    amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
-    status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('completed', 'Completed'), ('failed', 'Failed')], default='pending')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)

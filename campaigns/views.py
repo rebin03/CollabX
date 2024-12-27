@@ -20,7 +20,13 @@ class BrandDashboardView(View):
     
     def get(self, request, *args, **kwargs):
         
-        context = {}
+        brand_profile = request.user.profile.brand_profile
+        campaigns = brand_profile.campaigns.all()
+        
+        context = {
+            'campaigns': campaigns,
+        }
+        
         return render(request, self.template_name, context)
     
     
