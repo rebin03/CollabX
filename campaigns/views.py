@@ -1,7 +1,8 @@
 from django.shortcuts import redirect, render
 from django.views.generic import View
 from campaigns.forms import CampaignForm
-from campaigns.models import Campaign, Proposal
+from campaigns.models import Campaign, Proposal, Rating
+from django.db.models import Avg
 
 # Create your views here.
 
@@ -22,9 +23,17 @@ class BrandDashboardView(View):
         
         brand_profile = request.user.profile.brand_profile
         campaigns = brand_profile.campaigns.all()
-        
+        total_campaigns = campaigns.count()
+        active_collaborations = campaigns.filter(status='active').count()
+        pending_proposals = Proposal.objects.filter(campaign_object__in=campaigns, status='pending').count()
+        average_rating = Rating.objects.filter(proposal__campaign_object__in=campaigns).aggregate(Avg('rating'))['rating__avg'] or 0
+
         context = {
             'campaigns': campaigns,
+            'total_campaigns': total_campaigns,
+            'active_collaborations': active_collaborations,
+            'pending_proposals': pending_proposals,
+            'average_rating': round(average_rating, 1),
         }
         
         return render(request, self.template_name, context)
@@ -109,7 +118,14 @@ class CreatorDashbaordView(View):
 
     def get(self, request, *args, **kwargs):
         
-        return render(request, self.template_name)
+        creator_profile = request.user.profile.creator_profile
+        active_campaigns = Campaign.objects.filter(proposals__creator_object=creator_profile, proposals__status='accepted', status='active')
+        
+        context = {
+            'active_campaigns': active_campaigns,
+        }
+        
+        return render(request, self.template_name, context)
     
 
 
@@ -146,19 +162,40 @@ class AcceptProposalView(View):
     
     def post(self, request, *args, **kwargs):
         
-        id = kwargs.get('id')
+        id = kwargs.get('pk')
         proposal = Proposal.objects.get(id=id)
         proposal.status = 'accepted'
         proposal.save()
-        return redirect('campaign-detail', pk=proposal.campaign.id)
+        
+        # Set the campaign status to 'active'
+        campaign = proposal.campaign_object
+        campaign.status = 'active'
+        campaign.save()
+        
+        return redirect('pending-proposals')
 
 
 class RejectProposalView(View):
     
     def post(self, request, *args, **kwargs):
         
-        id = kwargs.get('id')
+        id = kwargs.get('pk')
         proposal = Proposal.objects.get(id=id)
         proposal.status = 'rejected'
         proposal.save()
-        return redirect('campaign-detail', pk=proposal.campaign.id)
+        return redirect('pending-proposals')
+    
+    
+class PendingProposalsView(View):
+    
+    template_name = 'pending_proposals.html'
+    
+    def get(self, request, *args, **kwargs):
+        brand_profile = request.user.profile.brand_profile
+        pending_proposals = Proposal.objects.filter(campaign_object__brand=brand_profile, status='pending')
+        
+        context = {
+            'pending_proposals': pending_proposals,
+        }
+        
+        return render(request, self.template_name, context)
