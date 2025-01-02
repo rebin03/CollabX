@@ -28,12 +28,16 @@ class BrandDashboardView(View):
         pending_proposals = Proposal.objects.filter(campaign_object__in=campaigns, status='pending').count()
         average_rating = Rating.objects.filter(proposal__campaign_object__in=campaigns).aggregate(Avg('rating'))['rating__avg'] or 0
 
+        # Filter accepted proposals
+        accepted_proposals = Proposal.objects.filter(campaign_object__in=campaigns, status='accepted')
+
         context = {
             'campaigns': campaigns,
             'total_campaigns': total_campaigns,
             'active_collaborations': active_collaborations,
             'pending_proposals': pending_proposals,
             'average_rating': round(average_rating, 1),
+            'accepted_proposals': accepted_proposals,
         }
         
         return render(request, self.template_name, context)
@@ -102,7 +106,10 @@ class CampaignDetailView(View):
         
         id = kwargs.get('pk')
         qs = Campaign.objects.get(id=id)
-        user_proposal = Proposal.objects.filter(campaign_object=qs, creator_object=request.user.profile.creator_profile).first()
+        user_proposal = None
+
+        if hasattr(request.user.profile, 'creator_profile'):
+            user_proposal = Proposal.objects.filter(campaign_object=qs, creator_object=request.user.profile.creator_profile).first()
         
         context = {
             'campaign':qs,
@@ -110,6 +117,52 @@ class CampaignDetailView(View):
         }
 
         return render(request, self.template_name, context)
+    
+    
+class UpdateCampaignView(View):
+    
+    template_name = 'edit_campaign.html'
+    form_class = CampaignForm
+    
+    def get(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        campaign = Campaign.objects.get(id=id)
+        form = self.form_class(instance=campaign)
+        
+        context = {
+            'form': form,
+            'campaign': campaign,
+        }
+        
+        return render(request, self.template_name, context)
+    
+    def post(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        campaign = Campaign.objects.get(id=id)
+        form = self.form_class(request.POST, request.FILES, instance=campaign)
+        
+        if form.is_valid():
+            form.save()
+            return redirect('brand-dashboard')
+        
+        context = {
+            'form': form,
+            'campaign': campaign,
+        }
+        
+        return render(request, self.template_name, context)
+
+
+class DeleteCampaignView(View):
+    
+    def post(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        campaign = Campaign.objects.get(id=id)
+        campaign.delete()
+        return redirect('brand-dashboard')
     
     
 class CreatorDashbaordView(View):
@@ -120,12 +173,35 @@ class CreatorDashbaordView(View):
         
         creator_profile = request.user.profile.creator_profile
         active_campaigns = Campaign.objects.filter(proposals__creator_object=creator_profile, proposals__status='accepted', status='active')
+        active_campaigns_count = active_campaigns.count()
+        pending_proposals_count = Proposal.objects.filter(creator_object=creator_profile, status='pending').count()
+        requested_campaigns = Proposal.objects.filter(creator_object=creator_profile).select_related('campaign_object')
+        
+        # Get dismissed notifications from session
+        dismissed_notifications = request.session.get('dismissed_notifications', [])
+
+        # Filter out dismissed notifications
+        notifications = requested_campaigns.exclude(id__in=dismissed_notifications)
         
         context = {
             'active_campaigns': active_campaigns,
+            'pending_proposals_count': pending_proposals_count,
+            'requested_campaigns': requested_campaigns,
+            'active_campaigns_count': active_campaigns_count,
+            'notifications': notifications,
         }
         
         return render(request, self.template_name, context)
+    
+    
+    def post(self, request, *args, **kwargs):
+        # Handle dismissing notifications
+        notification_id = request.POST.get('notification_id')
+        if notification_id:
+            dismissed_notifications = request.session.get('dismissed_notifications', [])
+            dismissed_notifications.append(int(notification_id))
+            request.session['dismissed_notifications'] = dismissed_notifications
+        return redirect('creator-dashboard')
     
 
 

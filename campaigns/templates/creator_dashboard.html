@@ -23,11 +23,11 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <div class="bg-white p-4 rounded shadow">
         <h2 class="text-lg font-medium text-gray-700">Active Campaigns</h2>
-        <p class="text-2xl font-bold mt-2">3</p>
+        <p class="text-2xl font-bold mt-2">{{active_campaigns_count}}</p>
       </div>
       <div class="bg-white p-4 rounded shadow">
         <h2 class="text-lg font-medium text-gray-700">Pending Proposals</h2>
-        <p class="text-2xl font-bold mt-2">5</p>
+        <p class="text-2xl font-bold mt-2">{{ pending_proposals_count }}</p>
       </div>
       <div class="bg-white p-4 rounded shadow">
         <h2 class="text-lg font-medium text-gray-700">Rating</h2>
@@ -63,64 +63,62 @@
         </div>
       </div>
       {% endfor %}
-      <!-- <div class="bg-white p-2 rounded shadow mb-2">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border border-2 rounded p-4 gap-4">
-          
-          <div>
-            <h3 class="text-lg font-semibold">Tech Gadget Review</h3>
-            <p class="text-sm text-gray-600">Brand: TechWorld</p>
-            <p class="text-sm text-gray-600">Deadline: 4/20/2024</p>
-            <p class="text-sm text-gray-600">Status: Content Due</p>
-          </div>
-      
-        
-          <div class="sm:self-start self-end">
-            <button 
-              class="border border-slate-400 text-primary px-4 py-2 rounded hover:bg-slate-100 flex items-center">
-              <i class="fa-regular fa-file-lines me-2"></i> Submit Report
-            </button>
-          </div>
-        </div>
-      </div> -->
     </div>
   
+    <!-- Notifications and Requested Campaigns -->
     <!-- Notifications and Requested Campaigns -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- Notifications -->
       <div>
         <h2 class="text-xl font-semibold mb-4">Notifications</h2>
-        <div class="bg-white p-4 rounded shadow mb-4">
-          <p class="text-sm text-green-600">✔ Campaign accepted: Summer Collection Launch</p>
-          <p class="text-sm text-gray-600">3/20/2024</p>
-        </div>
-        <div class="bg-white p-4 rounded shadow mb-4">
-          <p class="text-sm text-red-600">✖ Campaign rejected: Tech Review Series</p>
-          <p class="text-sm text-gray-600">3/19/2024</p>
-        </div>
-        <div class="bg-white p-4 rounded shadow">
-          <p class="text-sm text-green-600">✔ Campaign accepted: Fitness Challenge</p>
-          <p class="text-sm text-gray-600">3/18/2024</p>
-        </div>
+        {% for proposal in notifications %}
+          {% if proposal.status == 'accepted' %}
+          <div class="bg-white p-4 rounded shadow mb-4 flex justify-between items-center">
+            <div>
+              <p class="text-sm text-green-600">✔ Campaign accepted: {{ proposal.campaign_object.title }}</p>
+              <p class="text-sm text-gray-600">{{ proposal.submitted_at|date:"Y-m-d" }}</p>
+            </div>
+            <form method="POST" action="{% url 'creator-dashboard' %}">
+              {% csrf_token %}
+              <input type="hidden" name="notification_id" value="{{ proposal.id }}">
+              <button type="submit" class="text-gray-500 hover:text-red-600">
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </form>
+          </div>
+          {% elif proposal.status == 'rejected' %}
+          <div class="bg-white p-4 rounded shadow mb-4 flex justify-between items-center">
+            <div>
+              <p class="text-sm text-red-600">✖ Campaign rejected: {{ proposal.campaign_object.title }}</p>
+              <p class="text-sm text-gray-600">{{ proposal.submitted_at|date:"Y-m-d" }}</p>
+            </div>
+            <form method="POST" action="{% url 'creator-dashboard' %}">
+              {% csrf_token %}
+              <input type="hidden" name="notification_id" value="{{ proposal.id }}">
+              <button type="submit" class="text-gray-500 hover:text-red-600">
+                <i class="fa-solid fa-times"></i>
+              </button>
+            </form>
+          </div>
+          {% endif %}
+        {% endfor %}
       </div>
   
       <!-- Requested Campaigns -->
       <div>
         <h2 class="text-xl font-semibold mb-4">Requested Campaigns</h2>
-        <div class="bg-white p-4 rounded shadow mb-4">
-          <p class="font-medium">Summer Co.</p>
-          <p class="text-sm text-gray-600">Campaign: Summer Collection Launch</p>
-          <p class="text-sm text-yellow-600">Status: Pending</p>
+        {% for proposal in requested_campaigns %}
+        <div class="bg-white p-4 rounded shadow mb-4 flex justify-between items-center">
+          <div>
+            <p class="font-medium">{{ proposal.campaign_object.brand.brand_name }}</p>
+            <p class="text-sm text-gray-600">Campaign: {{ proposal.campaign_object.title }}</p>
+            <p class="text-sm {% if proposal.status == 'pending' %}text-yellow-600{% elif proposal.status == 'accepted' %}text-green-600{% else %}text-red-600{% endif %}">Status: {{ proposal.get_status_display }}</p>
+          </div>
+          <a href="{% url 'campaign-detail' proposal.campaign_object.id %}" class="text-blue-500 hover:underline">
+            <i class="fa-solid fa-eye"></i>
+          </a>
         </div>
-        <div class="bg-white p-4 rounded shadow mb-4">
-          <p class="font-medium">Tech Reviews</p>
-          <p class="text-sm text-gray-600">Campaign: Tech Review Series</p>
-          <p class="text-sm text-green-600">Status: Accepted</p>
-        </div>
-        <div class="bg-white p-4 rounded shadow">
-          <p class="font-medium">Lifestyle Blog</p>
-          <p class="text-sm text-gray-600">Campaign: Lifestyle Blog Series</p>
-          <p class="text-sm text-red-600">Status: Rejected</p>
-        </div>
+        {% endfor %}
       </div>
     </div>
 </div>
