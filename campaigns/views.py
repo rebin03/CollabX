@@ -1,8 +1,16 @@
 from django.shortcuts import redirect, render
 from django.views.generic import View
 from campaigns.forms import CampaignForm
-from campaigns.models import Campaign, Proposal, Rating
+from campaigns.models import Campaign, DismissedNotification, EscrowTransaction, Proposal, Rating
 from django.db.models import Avg
+from decouple import config
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+import razorpay
+
+RAZORPAY_KEY_ID = config('RZP_KEY_ID')
+RAZORPAY_KEY_SECRET = config('RZP_KEY_SECRET')
 
 # Create your views here.
 
@@ -178,7 +186,7 @@ class CreatorDashbaordView(View):
         requested_campaigns = Proposal.objects.filter(creator_object=creator_profile).select_related('campaign_object')
         
         # Get dismissed notifications from session
-        dismissed_notifications = request.session.get('dismissed_notifications', [])
+        dismissed_notifications = DismissedNotification.objects.filter(user=request.user).values_list('proposal_id', flat=True)
 
         # Filter out dismissed notifications
         notifications = requested_campaigns.exclude(id__in=dismissed_notifications)
@@ -198,9 +206,8 @@ class CreatorDashbaordView(View):
         # Handle dismissing notifications
         notification_id = request.POST.get('notification_id')
         if notification_id:
-            dismissed_notifications = request.session.get('dismissed_notifications', [])
-            dismissed_notifications.append(int(notification_id))
-            request.session['dismissed_notifications'] = dismissed_notifications
+            proposal = Proposal.objects.get(id=notification_id)
+            DismissedNotification.objects.create(user=request.user, proposal=proposal)
         return redirect('creator-dashboard')
     
 
@@ -248,7 +255,60 @@ class AcceptProposalView(View):
         campaign.status = 'active'
         campaign.save()
         
-        return redirect('pending-proposals')
+        # Create Razorpay order
+        client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+        order_amount = int(campaign.budget * 100)  # Convert to paise
+        order_currency = 'INR'
+        order_receipt = f'order_rcptid_{proposal.id}'
+        notes = {'proposal_id': proposal.id}
+        
+        try:
+            order = client.order.create({
+                'amount': order_amount,
+                'currency': order_currency,
+                'receipt': order_receipt,
+                'notes': notes
+            })
+        except Exception as e:
+            return render(request, 'payment_error.html', {'error': 'Error creating Razorpay order.'})
+        
+        # Create EscrowTransaction
+        escrow_transaction = EscrowTransaction.objects.create(
+            proposal=proposal,
+            amount=campaign.budget,
+            razorpay_order_id=order.get('id')
+        )
+        
+        context = {
+            'order_id': order.get('id'),
+            'amount': order_amount,
+            'currency': order_currency,
+            'razorpay_key_id': RAZORPAY_KEY_ID,
+            'proposal': proposal,
+            'escrow_transaction': escrow_transaction
+        }
+        
+        return render(request, 'payment.html', context)
+    
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PaymentCallbackView(View):
+    
+    def post(self, request, *args, **kwargs):
+        data = request.POST
+        client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+        
+        try:
+            client.utility.verify_payment_signature(data)
+            escrow_transaction = EscrowTransaction.objects.get(razorpay_order_id=data['razorpay_order_id'])
+            escrow_transaction.razorpay_payment_id = data['razorpay_payment_id']
+            escrow_transaction.razorpay_signature = data['razorpay_signature']
+            escrow_transaction.status = 'completed'
+            escrow_transaction.save()
+            return JsonResponse({'status': 'success'})
+        
+        except razorpay.errors.SignatureVerificationError:
+            return JsonResponse({'status': 'failure'})
 
 
 class RejectProposalView(View):
