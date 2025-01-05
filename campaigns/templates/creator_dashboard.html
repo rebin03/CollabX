@@ -50,11 +50,27 @@
             <h3 class="text-lg font-semibold">{{ campaign.title }}</h3>
             <p class="text-sm text-gray-600">Brand: {{ campaign.brand.brand_name }}</p>
             <p class="text-sm text-gray-600">Deadline: {{ campaign.deadline|date:"Y-m-d" }}</p>
-            <p class="text-sm text-gray-600">Status: Active</p>
+            <p class="text-sm text-gray-600">Status: 
+              {% for proposal in campaign.proposals.all %}
+                {% if proposal.creator_object == request.user.profile.creator_profile %}
+                  {{ proposal.get_status_display }}
+                {% endif %}
+              {% endfor %}
+            </p>
           </div>
           
-          <!-- Button -->
-          <div class="sm:self-start self-end">
+          <!-- Buttons -->
+          <div class="sm:self-start self-end flex gap-2">
+            {% for proposal in campaign.proposals.all %}
+              {% if proposal.creator_object == request.user.profile.creator_profile and proposal.status != 'working' %}
+                <form action="{% url 'start-working' campaign.id %}" method="POST">
+                  {% csrf_token %}
+                  <button type="submit" class="border border-slate-400 text-purple-700 px-4 py-2 rounded bg-purple-300 hover:bg-purple-100 flex items-center">
+                    Start Work
+                  </button>
+                </form>
+              {% endif %}
+            {% endfor %}
             <button 
               class="border border-slate-400 text-primary px-4 py-2 rounded hover:bg-slate-100 flex items-center">
               <i class="fa-regular fa-file-lines me-2"></i> Submit Report

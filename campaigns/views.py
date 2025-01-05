@@ -180,7 +180,11 @@ class CreatorDashbaordView(View):
     def get(self, request, *args, **kwargs):
         
         creator_profile = request.user.profile.creator_profile
-        active_campaigns = Campaign.objects.filter(proposals__creator_object=creator_profile, proposals__status='accepted', status='active')
+        active_campaigns = Campaign.objects.filter(
+            proposals__creator_object=creator_profile,
+            proposals__status__in=['accepted', 'working'],
+            status='active'
+        )
         active_campaigns_count = active_campaigns.count()
         pending_proposals_count = Proposal.objects.filter(creator_object=creator_profile, status='pending').count()
         requested_campaigns = Proposal.objects.filter(creator_object=creator_profile).select_related('campaign_object')
@@ -289,6 +293,18 @@ class AcceptProposalView(View):
         }
         
         return render(request, 'payment.html', context)
+    
+
+class StartWorkingView(View):
+    
+    def post(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        proposal = Proposal.objects.get(campaign_object_id=id, creator_object=request.user.profile.creator_profile)
+        proposal.status = 'working'
+        proposal.save()
+        
+        return redirect('creator-dashboard')
     
 
 @method_decorator(csrf_exempt, name='dispatch')

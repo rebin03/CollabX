@@ -16,4 +16,5 @@ urlpatterns = [
     path('pending-proposals/', views.PendingProposalsView.as_view(), name='pending-proposals'),
     path('cancel-proposal/<int:pk>/', views.CancelProposalView.as_view(), name='cancel-proposal'),
     path('payment/callback/', views.PaymentCallbackView.as_view(), name='payment-callback'),
+    path('start-working/<int:pk>/', views.StartWorkingView.as_view(), name='start-working'),
 ]
