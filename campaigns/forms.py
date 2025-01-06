@@ -1,5 +1,5 @@
 from django import forms
-from campaigns.models import Campaign, ContentType, Audience
+from campaigns.models import Campaign, ContentType, Audience, Proposal
 
 
 
@@ -36,3 +36,15 @@ class CampaignForm(forms.ModelForm):
         if not audience_preferences:
             raise forms.ValidationError("You must select at least one audience preference.")
         return audience_preferences
+
+
+class ReportForm(forms.ModelForm):
+    class Meta:
+        model = Proposal
+        fields = ['report_description', 'report_image', 'report_video', 'report_pdf']
+        widgets = {
+            'report_description': forms.Textarea(attrs={'rows': 4, 'class': 'w-full p-3 border rounded bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none'}),
+            'report_image': forms.ClearableFileInput(attrs={'class': 'w-full p-3 border rounded bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none'}),
+            'report_video': forms.ClearableFileInput(attrs={'class': 'w-full p-3 border rounded bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none'}),
+            'report_pdf': forms.ClearableFileInput(attrs={'class': 'w-full p-3 border rounded bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none'}),
+        }

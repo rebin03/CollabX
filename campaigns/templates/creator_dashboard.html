@@ -5,6 +5,34 @@
     body {
         background-color: #F3F4F6;
     }
+    .notification-panel {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 25%;
+        height: 100%;
+        background-color: white;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease;
+        z-index: 50;
+        overflow-y: auto;
+    }
+    .notification-panel.open {
+        right: 0;
+    }
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 40;
+        display: none;
+    }
+    .overlay.open {
+        display: block;
+    }
 </style>
 {% endblock %}
 
@@ -13,14 +41,23 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
       <h1 class="text-2xl font-semibold text-center sm:text-left mb-4 sm:mb-0">Creator Dashboard</h1>
-      <a href="{% url 'campaign-list' %}" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 flex items-center justify-center sm:justify-start">
-        <i class="fa-solid fa-magnifying-glass me-2"></i> Browse Campaigns
-      </a>
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <button id="notification-button" class="relative text-gray-600 hover:text-purple-500 focus:outline-none">
+            <i class="fa-solid fa-bell text-2xl"></i>
+            {% if notification_count > 0 %}
+            <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">{{ notification_count }}</span>
+            {% endif %}
+          </button>
+        </div>
+        <a href="{% url 'campaign-list' %}" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 flex items-center justify-center sm:justify-start">
+          <i class="fa-solid fa-magnifying-glass me-2"></i> Browse Campaigns
+        </a>
+      </div>
     </div>
 
-  
     <!-- Stats Section -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-white p-4 rounded shadow">
         <h2 class="text-lg font-medium text-gray-700">Active Campaigns</h2>
         <p class="text-2xl font-bold mt-2">{{active_campaigns_count}}</p>
@@ -30,18 +67,20 @@
         <p class="text-2xl font-bold mt-2">{{ pending_proposals_count }}</p>
       </div>
       <div class="bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-medium text-gray-700">Completed Campaigns</h2>
+        <p class="text-2xl font-bold mt-2">{{ completed_proposals_count }}</p>
+      </div>
+      <div class="bg-white p-4 rounded shadow">
         <h2 class="text-lg font-medium text-gray-700">Rating</h2>
         <p class="text-2xl font-bold mt-2">4.8</p>
       </div>
-      <!-- <div class="bg-white p-4 rounded shadow">
-        <h2 class="text-lg font-medium text-gray-700">Total Campaigns</h2>
-        <p class="text-2xl font-bold mt-2">12</p>
-      </div> -->
     </div>
   
     <!-- Active Campaigns Section -->
     <div class="mb-6">
+      {% if active_campaigns %}
       <h2 class="text-xl font-semibold mb-4">Active Campaigns</h2>
+      {% endif %}
       {% for campaign in active_campaigns %}
       <div class="bg-white p-2 rounded shadow mb-2">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border border-2 rounded p-4 gap-4">
@@ -62,7 +101,7 @@
           <!-- Buttons -->
           <div class="sm:self-start self-end flex gap-2">
             {% for proposal in campaign.proposals.all %}
-              {% if proposal.creator_object == request.user.profile.creator_profile and proposal.status != 'working' %}
+              {% if proposal.creator_object == request.user.profile.creator_profile and proposal.status != 'working' and proposal.status != 'submitted' %}
                 <form action="{% url 'start-working' campaign.id %}" method="POST">
                   {% csrf_token %}
                   <button type="submit" class="border border-slate-400 text-purple-700 px-4 py-2 rounded bg-purple-300 hover:bg-purple-100 flex items-center">
@@ -70,23 +109,82 @@
                   </button>
                 </form>
               {% endif %}
+              {% if proposal.status == 'working' %}
+              <a href="{% url 'submit-report' campaign.id %}" class="border border-slate-400 text-primary px-4 py-2 rounded hover:bg-slate-100 flex items-center">
+                <i class="fa-regular fa-file-lines me-2"></i> Submit Report
+              </a>
+              {% endif %}
             {% endfor %}
-            <button 
-              class="border border-slate-400 text-primary px-4 py-2 rounded hover:bg-slate-100 flex items-center">
-              <i class="fa-regular fa-file-lines me-2"></i> Submit Report
-            </button>
+            <a href="{% url 'campaign-detail' campaign.id %}" class="text-primary p-3 rounded hover:bg-purple-100 flex items-center">
+              <i class="fa-regular fa-eye"></i>
+            </a>
           </div>
         </div>
       </div>
       {% endfor %}
     </div>
   
-    <!-- Notifications and Requested Campaigns -->
-    <!-- Notifications and Requested Campaigns -->
+    <!-- Requested Campaigns -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Notifications -->
       <div>
-        <h2 class="text-xl font-semibold mb-4">Notifications</h2>
+        <h2 class="text-xl font-semibold mb-4">Requested Campaigns</h2>
+        {% for proposal in requested_campaigns %}
+        {% if proposal.status == "pending" or proposal.status == "rejected" %}
+        <div class="bg-white p-4 rounded shadow mb-4 flex justify-between items-center">
+          <div>
+            <p class="font-medium">{{ proposal.campaign_object.brand.brand_name }}</p>
+            <p class="text-sm text-gray-600">Campaign: {{ proposal.campaign_object.title }}</p>
+            <p class="text-sm {% if proposal.status == 'pending' %}text-yellow-600{% elif proposal.status == 'accepted' %}text-green-600{% else %}text-red-600{% endif %}">Status: {{ proposal.get_status_display }}</p>
+          </div>
+          <a href="{% url 'campaign-detail' proposal.campaign_object.id %}" class="text-blue-500 hover:underline">
+            <i class="fa-solid fa-eye"></i>
+          </a>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- Completed Campaigns Section -->
+      <div class="mb-6">
+        {% if completed_campaigns %}
+        <h2 class="text-xl font-semibold mb-4">Completed Campaigns</h2>
+        {% endif %}
+        {% for campaign in completed_campaigns %}
+        <div class="bg-white p-2 rounded shadow mb-2">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border border-2 rounded p-4 gap-4">
+            <!-- Content -->
+            <div>
+              <h3 class="text-lg font-semibold">{{ campaign.title }}</h3>
+              <p class="text-sm text-gray-600">Brand: {{ campaign.brand.brand_name }}</p>
+              <p class="text-sm text-gray-600">Completed On: {{ campaign.updated_date|date:"Y-m-d" }}</p>
+              <p class="text-sm text-gray-600">Payment Received: ₹{{ campaign.budget | floatformat:0 }}</p>
+            </div>
+            
+            <!-- Buttons -->
+            <div class="sm:self-start self-end flex gap-2">
+              <a href="{% url 'invoice' campaign.id %}" class="border border-slate-400 text-primary px-4 py-2 rounded hover:bg-slate-100 flex items-center">
+                <i class="fa-solid fa-receipt me-2"></i> Invoice
+              </a>
+              <a href="{% url 'campaign-detail' campaign.id %}" class="border border-slate-400 text-primary px-4 py-2 rounded hover:bg-slate-100 flex items-center">
+                <i class="fa-regular fa-eye me-2"></i> View Details
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+</div>
+
+<!-- Notification Panel -->
+<div id="notification-panel" class="notification-panel">
+    <div class="p-4 border-b flex justify-between items-center">
+        <h2 class="text-xl font-semibold">Notifications</h2>
+        <button id="close-notification-panel" class="text-gray-500 hover:text-red-600">
+            <i class="fa-solid fa-times"></i>
+        </button>
+    </div>
+    <div class="p-4">
         {% for proposal in notifications %}
           {% if proposal.status == 'accepted' %}
           <div class="bg-white p-4 rounded shadow mb-4 flex justify-between items-center">
@@ -118,24 +216,31 @@
           </div>
           {% endif %}
         {% endfor %}
-      </div>
-  
-      <!-- Requested Campaigns -->
-      <div>
-        <h2 class="text-xl font-semibold mb-4">Requested Campaigns</h2>
-        {% for proposal in requested_campaigns %}
-        <div class="bg-white p-4 rounded shadow mb-4 flex justify-between items-center">
-          <div>
-            <p class="font-medium">{{ proposal.campaign_object.brand.brand_name }}</p>
-            <p class="text-sm text-gray-600">Campaign: {{ proposal.campaign_object.title }}</p>
-            <p class="text-sm {% if proposal.status == 'pending' %}text-yellow-600{% elif proposal.status == 'accepted' %}text-green-600{% else %}text-red-600{% endif %}">Status: {{ proposal.get_status_display }}</p>
-          </div>
-          <a href="{% url 'campaign-detail' proposal.campaign_object.id %}" class="text-blue-500 hover:underline">
-            <i class="fa-solid fa-eye"></i>
-          </a>
-        </div>
-        {% endfor %}
-      </div>
     </div>
 </div>
+
+<!-- Overlay -->
+<div id="overlay" class="overlay"></div>
+
+<script>
+    const notificationButton = document.getElementById('notification-button');
+    const notificationPanel = document.getElementById('notification-panel');
+    const closeNotificationPanel = document.getElementById('close-notification-panel');
+    const overlay = document.getElementById('overlay');
+
+    notificationButton.addEventListener('click', () => {
+        notificationPanel.classList.toggle('open');
+        overlay.classList.toggle('open');
+    });
+
+    closeNotificationPanel.addEventListener('click', () => {
+        notificationPanel.classList.remove('open');
+        overlay.classList.remove('open');
+    });
+
+    overlay.addEventListener('click', () => {
+        notificationPanel.classList.remove('open');
+        overlay.classList.remove('open');
+    });
+</script>
 {% endblock %}

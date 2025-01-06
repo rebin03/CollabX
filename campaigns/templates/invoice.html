@@ -1,0 +1,82 @@
+{% extends 'campaigns_base.html' %}
+
+{% block style %}
+<style>
+    body {
+        background-color: #F3F4F6;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="flex justify-center items-center min-h-screen">
+    <div class="relative w-full max-w-4xl mx-auto">
+        <!-- Back to previous -->
+        <div class="absolute top-4 left-4">
+            <button onclick="history.back()" class="text-gray-500 text-sm font-medium hover:text-gray-700">
+                &larr; Back
+            </button>
+        </div>
+        <div class="bg-white p-8 border border-gray-200 shadow-lg rounded-lg mt-16">
+            <div class="mb-8">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-4xl font-bold text-gray-900">Invoice</h1>
+                    </div>
+                    <div class="text-right">
+                        <p>Invoice #: {{ escrow_transaction.id }}</p>
+                        <p>Created: {{ escrow_transaction.created_at|date:"Y-m-d" }}</p>
+                        <p>Due: {{ escrow_transaction.updated_at|date:"Y-m-d" }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-8">
+                <div class="flex justify-between">
+                    <div>
+                        <p class="font-semibold">{{ campaign.brand.brand_name }}</p>
+                        <p>{{ campaign.brand.profile_object.owner.email }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-semibold">{{ proposal.creator_object.profile_object.full_name }}</p>
+                        <p>{{ proposal.creator_object.profile_object.owner.email }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <div class="flex justify-between bg-gray-100 p-2 rounded">
+                    <p class="font-semibold">Payment Method</p>
+                    <p>Razorpay</p>
+                </div>
+            </div>
+            
+            <div class="mb-8">
+                <div class="flex justify-between p-2">
+                    <p>Razorpay Payment ID</p>
+                    <p>{{ escrow_transaction.razorpay_payment_id }}</p>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <div class="flex justify-between bg-gray-100 p-2 rounded">
+                    <p class="font-semibold">Item</p>
+                    <p class="font-semibold">Price</p>
+                </div>
+            </div>
+            
+            <div class="mb-8">
+                <div class="flex justify-between p-2 border-b border-gray-200">
+                    <p>{{ campaign.title }}</p>
+                    <p>₹{{ escrow_transaction.amount }}</p>
+                </div>
+            </div>
+            
+            <div class="flex justify-between p-2 border-t border-gray-200 font-semibold">
+                <p>Total</p>
+                <p>₹{{ escrow_transaction.amount }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

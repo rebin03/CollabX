@@ -56,6 +56,7 @@ class Proposal(BaseModel):
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
         ('rejected', 'Rejected'),
+        ('submitted', 'Submitted'),
         ('working', 'Working'),
         ('completed', 'Completed'),
     )
@@ -66,7 +67,11 @@ class Proposal(BaseModel):
     submitted_at = models.DateTimeField(default=timezone.now)
     completed_at = models.DateTimeField(null=True, blank=True)
     payment_status = models.CharField(max_length=20, choices=[('unpaid', 'Unpaid'), ('paid', 'Paid')], default='unpaid')
-
+    report_description = models.TextField(null=True, blank=True)
+    report_image = models.ImageField(upload_to='report_images', null=True, blank=True)
+    report_video = models.FileField(upload_to='report_videos', null=True, blank=True)
+    report_pdf = models.FileField(upload_to='report_pdfs', null=True, blank=True)
+    
 
 class DismissedNotification(models.Model):
     user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)

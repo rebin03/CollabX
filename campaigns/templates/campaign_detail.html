@@ -92,14 +92,24 @@
               <p class="text-sm text-gray-500 mt-2">Status: {{ user_proposal.get_status_display }}</p>
               {% if user_proposal.status == 'accepted' and campaign.status == 'active' %}
                 <p class="text-sm text-green-600 mt-2">Your proposal has been accepted and the campaign is active.</p>
-                <form action="" method="POST" class="mt-4">
+                <form action="{% url 'start-working' campaign.id %}" method="POST" class="mt-4">
                   {% csrf_token %}
+                  <button type="submit" class="bg-purple-300 hover:bg-purple-100 text-purple-700 font-semibold py-2 px-4 rounded-lg shadow-md focus:outline-none">
+                    Start Work
+                  </button>
+                </form>
+              {% elif user_proposal.status == 'working' %}
+                <form action="{% url 'submit-report' campaign.id %}" method="GET" class="mt-4">
                   <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md focus:outline-none">
                     Submit Report
                   </button>
                 </form>
               {% elif user_proposal.status == 'rejected' %}
                 <p class="text-sm text-red-600 mt-2">Sorry! Your proposal has been rejected.</p>
+              {% elif user_proposal.status == 'submitted' %}
+                <p class="text-sm text-green-600 mt-2">You have submitted your campaign report. You'll be notified after the review</p>
+                {% elif user_proposal.status == 'completed' and user_proposal.escrow_transaction.status == 'completed' %}
+                <p class="text-sm text-green-600 mt-2">The campaign has been successfully completed and you have received the payment of ₹{{ campaign.budget | floatformat:0 }}.</p>
               {% else %}
                 <form action="{% url 'cancel-proposal' user_proposal.id %}" method="POST" class="mt-4">
                   {% csrf_token %}

@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, render
 from django.views.generic import View
-from campaigns.forms import CampaignForm
+from campaigns.forms import CampaignForm, ReportForm
 from campaigns.models import Campaign, DismissedNotification, EscrowTransaction, Proposal, Rating
 from django.db.models import Avg
 from decouple import config
@@ -37,7 +37,9 @@ class BrandDashboardView(View):
         average_rating = Rating.objects.filter(proposal__campaign_object__in=campaigns).aggregate(Avg('rating'))['rating__avg'] or 0
 
         # Filter accepted proposals
-        accepted_proposals = Proposal.objects.filter(campaign_object__in=campaigns, status='accepted')
+        accepted_proposals = Proposal.objects.filter(campaign_object__in=campaigns, status__in=['accepted', 'working', 'submitted'])
+        completed_proposals = Proposal.objects.filter(campaign_object__in=campaigns, status='completed')
+        past_campaigns = campaigns.filter(status='completed')
 
         context = {
             'campaigns': campaigns,
@@ -46,6 +48,8 @@ class BrandDashboardView(View):
             'pending_proposals': pending_proposals,
             'average_rating': round(average_rating, 1),
             'accepted_proposals': accepted_proposals,
+            'completed_proposals': completed_proposals,
+            'past_campaigns': past_campaigns,
         }
         
         return render(request, self.template_name, context)
@@ -97,7 +101,7 @@ class CampaignListView(View):
 
     def get(self, request, *args, **kwargs):
         
-        qs = Campaign.objects.all()
+        qs = Campaign.objects.exclude(status__in=['completed', 'closed'])
         
         context = {
             'campaigns':qs
@@ -171,6 +175,35 @@ class DeleteCampaignView(View):
         campaign = Campaign.objects.get(id=id)
         campaign.delete()
         return redirect('brand-dashboard')
+
+
+
+class ViewReportView(View):
+    
+    template_name = 'view_report.html'
+    
+    def get(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        proposal = Proposal.objects.get(id=id)
+        
+        context = {
+            'proposal': proposal,
+        }
+        
+        return render(request, self.template_name, context)
+    
+    
+class CompleteCampaignView(View):
+    
+    def post(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        campaign = Campaign.objects.get(id=id)
+        campaign.status = 'completed'
+        campaign.save()
+        
+        return redirect('brand-dashboard')
     
     
 class CreatorDashbaordView(View):
@@ -182,25 +215,34 @@ class CreatorDashbaordView(View):
         creator_profile = request.user.profile.creator_profile
         active_campaigns = Campaign.objects.filter(
             proposals__creator_object=creator_profile,
-            proposals__status__in=['accepted', 'working'],
+            proposals__status__in=['accepted', 'working', 'submitted'],
             status='active'
+        )
+        completed_campaigns = Campaign.objects.filter(
+            proposals__creator_object=creator_profile,
+            proposals__status='completed'
         )
         active_campaigns_count = active_campaigns.count()
         pending_proposals_count = Proposal.objects.filter(creator_object=creator_profile, status='pending').count()
+        completed_proposals_count = Proposal.objects.filter(creator_object=creator_profile, status='completed').count()
         requested_campaigns = Proposal.objects.filter(creator_object=creator_profile).select_related('campaign_object')
         
         # Get dismissed notifications from session
         dismissed_notifications = DismissedNotification.objects.filter(user=request.user).values_list('proposal_id', flat=True)
 
         # Filter out dismissed notifications
-        notifications = requested_campaigns.exclude(id__in=dismissed_notifications)
+        notifications = requested_campaigns.exclude(id__in=dismissed_notifications).filter(status__in=['rejected', 'accepted'])
+        notification_count = notifications.count()
         
         context = {
             'active_campaigns': active_campaigns,
+            'completed_campaigns': completed_campaigns,
             'pending_proposals_count': pending_proposals_count,
+            'completed_proposals_count': completed_proposals_count,
             'requested_campaigns': requested_campaigns,
             'active_campaigns_count': active_campaigns_count,
             'notifications': notifications,
+            'notification_count': notification_count,
         }
         
         return render(request, self.template_name, context)
@@ -307,6 +349,87 @@ class StartWorkingView(View):
         return redirect('creator-dashboard')
     
 
+class SubmitReportView(View):
+    
+    template_name = 'submit_report.html'
+    form_class = ReportForm
+    
+    def get(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        proposal = Proposal.objects.get(campaign_object_id=id, creator_object=request.user.profile.creator_profile)
+        form = self.form_class(instance=proposal)
+        
+        context = {
+            'form': form,
+            'proposal': proposal,
+        }
+        
+        return render(request, self.template_name, context)
+    
+    def post(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        proposal = Proposal.objects.get(campaign_object_id=id, creator_object=request.user.profile.creator_profile)
+        form = self.form_class(request.POST, request.FILES, instance=proposal)
+        
+        if form.is_valid():
+            proposal.status = 'submitted'
+            form.save()
+            return redirect('creator-dashboard')
+        
+        context = {
+            'form': form,
+            'proposal': proposal,
+        }
+        
+        return render(request, self.template_name, context)
+
+
+class ReviewReportView(View):
+    
+    def post(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        proposal = Proposal.objects.get(id=id)
+        action = request.POST.get('action')
+        
+        if action == 'accept':
+            proposal.status = 'completed'
+            proposal.save()
+            
+            # Release payment to the creator
+            escrow_transaction = proposal.escrow_transaction
+            escrow_transaction.status = 'completed'
+            escrow_transaction.save()
+        
+        elif action == 'reject':
+            proposal.status = 'working'
+            proposal.save()
+        
+        return redirect('brand-dashboard')
+    
+    
+class InvoiceView(View):
+    
+    template_name = 'invoice.html'
+    
+    def get(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        campaign = Campaign.objects.get(id=id)
+        proposal = Proposal.objects.filter(campaign_object=campaign, creator_object=request.user.profile.creator_profile).first()
+        escrow_transaction = proposal.escrow_transaction
+        
+        context = {
+            'campaign': campaign,
+            'proposal': proposal,
+            'escrow_transaction': escrow_transaction,
+        }
+        
+        return render(request, self.template_name, context)
+   
+
 @method_decorator(csrf_exempt, name='dispatch')
 class PaymentCallbackView(View):
     
@@ -319,12 +442,13 @@ class PaymentCallbackView(View):
             escrow_transaction = EscrowTransaction.objects.get(razorpay_order_id=data['razorpay_order_id'])
             escrow_transaction.razorpay_payment_id = data['razorpay_payment_id']
             escrow_transaction.razorpay_signature = data['razorpay_signature']
-            escrow_transaction.status = 'completed'
+            # escrow_transaction.status = 'pending'
             escrow_transaction.save()
             return JsonResponse({'status': 'success'})
         
         except razorpay.errors.SignatureVerificationError:
             return JsonResponse({'status': 'failure'})
+
 
 
 class RejectProposalView(View):
