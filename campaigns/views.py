@@ -408,26 +408,6 @@ class ReviewReportView(View):
             proposal.save()
         
         return redirect('brand-dashboard')
-    
-    
-class InvoiceView(View):
-    
-    template_name = 'invoice.html'
-    
-    def get(self, request, *args, **kwargs):
-        
-        id = kwargs.get('pk')
-        campaign = Campaign.objects.get(id=id)
-        proposal = Proposal.objects.filter(campaign_object=campaign, creator_object=request.user.profile.creator_profile).first()
-        escrow_transaction = proposal.escrow_transaction
-        
-        context = {
-            'campaign': campaign,
-            'proposal': proposal,
-            'escrow_transaction': escrow_transaction,
-        }
-        
-        return render(request, self.template_name, context)
    
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -472,6 +452,26 @@ class PendingProposalsView(View):
         
         context = {
             'pending_proposals': pending_proposals,
+        }
+        
+        return render(request, self.template_name, context)
+    
+    
+class InvoiceView(View):
+    
+    template_name = 'invoice.html'
+    
+    def get(self, request, *args, **kwargs):
+        
+        id = kwargs.get('pk')
+        campaign = Campaign.objects.get(id=id)
+        proposal = Proposal.objects.filter(campaign_object=campaign, creator_object=request.user.profile.creator_profile).first()
+        escrow_transaction = proposal.escrow_transaction
+        
+        context = {
+            'campaign': campaign,
+            'proposal': proposal,
+            'escrow_transaction': escrow_transaction,
         }
         
         return render(request, self.template_name, context)
