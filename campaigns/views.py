@@ -95,16 +95,39 @@ class CreateCampaignView(View):
         return render(request, self.template_name, context)
     
     
+
 class CampaignListView(View):
     
     template_name = 'campaign_list.html'
 
     def get(self, request, *args, **kwargs):
+        brand_type = request.GET.getlist('brand_type')
+        content_type = request.GET.getlist('content_type')
+        audience_type = request.GET.getlist('audience_type')
+        min_budget = request.GET.get('min_budget')
+        max_budget = request.GET.get('max_budget')
+
+        campaigns = Campaign.objects.exclude(status__in=['completed', 'closed'])
+
+        if brand_type:
+            campaigns = campaigns.filter(brand__brand_type__in=brand_type)
         
-        qs = Campaign.objects.exclude(status__in=['completed', 'closed'])
+        if content_type:
+            campaigns = campaigns.filter(content_types__name__in=content_type).distinct()
         
+        if audience_type:
+            campaigns = campaigns.filter(audience_preferences__name__in=audience_type).distinct()
+        
+        if min_budget and max_budget:
+            campaigns = campaigns.filter(budget__gte=min_budget, budget__lte=max_budget)
+
         context = {
-            'campaigns':qs
+            'campaigns': campaigns,
+            'selected_brand_type': brand_type,
+            'selected_content_type': content_type,
+            'selected_audience_type': audience_type,
+            'min_budget': min_budget,
+            'max_budget': max_budget,
         }
         
         return render(request, self.template_name, context)
