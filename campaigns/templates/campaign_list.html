@@ -48,109 +48,86 @@
     <div id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-white border-r p-6 border-gray-300 z-50 transform -translate-x-full transition-transform duration-300 sm:translate-x-0 sm:w-1/4">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-lg font-semibold text-gray-800">Filters</h2>
-        <button class="text-sm text-purple-700 font-medium hover:underline">Clear All</button>
-        <button id="close-sidebar" class="text-gray-500 text-xl sm:hidden">&times;</button>
+        <button id="clear-filters" type="button" class="text-sm text-purple-700 font-medium hover:underline">Clear All</button>
+        <button id="close-sidebar" type="button" class="text-gray-500 text-xl sm:hidden">&times;</button>
       </div>
 
-      <!-- Search Filter -->
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
-        <div class="relative">
-          <input type="text" placeholder="Search campaigns..." class="w-full p-2 pr-10 border rounded-md focus:ring-purple-500 focus:border-purple-500">
-          <button class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-purple-600">
-            <i class="fas fa-search"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Filters: Brand Type, Content Type, Audience, Budget -->
-      <div class="space-y-6">
-        <!-- Brand Type Filter -->
-        <div>
-          <h3 class="text-sm font-semibold text-gray-700 mb-4 uppercase border-b">Brand Type</h3>
-          <label class="flex items-center text-gray-600">
-            <input type="checkbox" class="form-checkbox accent-purple-500">
-            <span class="ml-2">E-commerce</span>
-          </label>
-          <label class="flex items-center text-gray-600">
-            <input type="checkbox" class="form-checkbox accent-purple-500">
-            <span class="ml-2">Fashion</span>
-          </label>
-          <label class="flex items-center text-gray-600">
-            <input type="checkbox" class="form-checkbox accent-purple-500">
-            <span class="ml-2">Tech</span>
-          </label>
-          <label class="flex items-center text-gray-600">
-            <input type="checkbox" class="form-checkbox accent-purple-500">
-            <span class="ml-2">Lifestyle</span>
-          </label>
+      <!-- Filter Form -->
+      <form id="filter-form" method="GET" action="{% url 'campaign-list' %}">
+        <!-- Search Filter -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+          <div class="relative">
+            <input type="text" name="search" placeholder="Search campaigns..." value="{{ search_query }}" class="w-full p-2 pr-10 border rounded-md focus:ring-purple-500 focus:border-purple-500">
+            <button class="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-purple-600">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
         </div>
 
-        <!-- Content Type Filter -->
-        <div>
-          <h3 class="text-sm font-semibold text-gray-700 mb-4 uppercase border-b">Content Type</h3>
-          <label class="flex items-center text-gray-600">
-            <input type="checkbox" class="form-checkbox accent-purple-500">
-            <span class="ml-2">Video</span>
-          </label>
-          <label class="flex items-center text-gray-600">
-            <input type="checkbox" class="form-checkbox accent-purple-500">
-            <span class="ml-2">Image</span>
-          </label>
-          <label class="flex items-center text-gray-600">
-            <input type="checkbox" class="form-checkbox accent-purple-500">
-            <span class="ml-2">Blog</span>
-          </label>
-          <label class="flex items-center text-gray-600">
-            <input type="checkbox" class="form-checkbox accent-purple-500">
-            <span class="ml-2">Story</span>
-          </label>
-        </div>
+        <!-- Filters: Content Type, Audience, Budget -->
+        <div class="space-y-4">
+          <!-- Content Type Filter -->
+          <div>
+            <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase border-b">Content Type</h3>
+            {% for content in all_content_types %}
+            <label class="flex items-center text-gray-600">
+              <input type="checkbox" name="content_type" value="{{ content.name }}" class="form-checkbox accent-purple-500" {% if content.name in selected_content_type %}checked{% endif %}>
+              <span class="ml-2">{{ content.name }}</span>
+            </label>
+            {% endfor %}
+          </div>
 
-        <!-- Audience Filter -->
-        <div>
-          <h3 class="text-sm font-semibold text-gray-700 mb-4 uppercase border-b">Audience</h3>
-          <label class="flex items-center text-gray-600">
-            <input type="radio" name="audience" class="form-radio accent-purple-500">
-            <span class="ml-2">10K-50K</span>
-          </label>
-          <label class="flex items-center text-gray-600">
-            <input type="radio" name="audience" class="form-radio accent-purple-500">
-            <span class="ml-2">50K-200K</span>
-          </label>
-          <label class="flex items-center text-gray-600">
-            <input type="radio" name="audience" class="form-radio accent-purple-500">
-            <span class="ml-2">200K-1M</span>
-          </label>
-          <label class="flex items-center text-gray-600">
-            <input type="radio" name="audience" class="form-radio accent-purple-500">
-            <span class="ml-2">1M+</span>
-          </label>
-        </div>
+          <!-- Audience Filter -->
+          <div>
+            <h3 class="text-sm font-semibold text-gray-700 mb-2 uppercase border-b">Audience</h3>
+            {% for audience in all_audience_types %}
+            <label class="flex items-center text-gray-600">
+              <input type="checkbox" name="audience_type" value="{{ audience.name }}" class="form-checkbox accent-purple-500" {% if audience.name in selected_audience_type %}checked{% endif %}>
+              <span class="ml-2">{{ audience.name }}</span>
+            </label>
+            {% endfor %}
+          </div>
 
-        <!-- Budget Filter -->
-        <div>
+          <!-- Budget Filter -->
+          <div>
             <h3 class="text-sm font-semibold text-gray-700 mb-4 uppercase border-b">Budget</h3>
             <!-- Slider Container -->
             <div class="relative">
               <input 
                 type="range" 
-                id="budget-slider" 
+                id="min-budget-slider" 
+                name="min_budget"
                 min="1000" 
-                max="100000" 
+                max="{{ max_budget_value }}" 
                 step="500" 
-                value="1000" 
+                value="{{ min_budget|default:1000 }}" 
+                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pink-500"
+              />
+              <input 
+                type="range" 
+                id="max-budget-slider" 
+                name="max_budget"
+                min="1000" 
+                max="{{ max_budget_value }}" 
+                step="500" 
+                value="{{ max_budget|default:max_budget_value }}" 
                 class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pink-500"
               />
               <!-- Display Selected Value -->
               <p class="text-sm mt-2 text-gray-600">
-                <span id="min-budget">₹1000</span> - 
-                <span id="max-budget">₹10,0000</span>
+                <span id="min-budget">₹{{ min_budget|default:1000 }}</span> - 
+                <span id="max-budget">₹{{ max_budget|default:max_budget_value }}</span>
               </p>
             </div>
           </div>
           
-      </div>
+          <!-- Submit Button -->
+          <div class="mt-6">
+            <button type="submit" class="bg-purple-500 text-white py-2 px-4 rounded hover:bg-purple-600">Apply Filters</button>
+          </div>
+        </div>
+      </form>
     </div>
 
     <!-- Main Content -->
@@ -180,9 +157,6 @@
                     {{campaign.title}}
                 </h2>
                 <p class="text-sm text-gray-500 mb-4">by {{campaign.brand.brand_name}}</p>
-                <!-- <p class="text-gray-700 mb-4">
-                    Looking for fashion influencers to promote our summer collection.
-                </p> -->
                 <!-- Tags -->
                 <div class="flex space-x-2 mb-4">
                     {% for content_type in campaign.content_types.all %}
@@ -216,6 +190,7 @@
     const sidebar = document.getElementById('sidebar');
     const openSidebar = document.getElementById('open-sidebar');
     const closeSidebar = document.getElementById('close-sidebar');
+    const clearFilters = document.getElementById('clear-filters');
 
     openSidebar.addEventListener('click', () => {
       sidebar.classList.remove('-translate-x-full');
@@ -231,14 +206,36 @@
         }
     });
 
+    clearFilters.addEventListener('click', () => {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(checkbox => checkbox.checked = false);
+
+      const ranges = document.querySelectorAll('input[type="range"]');
+      ranges.forEach(range => {
+        if (range.id === 'min-budget-slider') {
+          range.value = range.min;
+        } else if (range.id === 'max-budget-slider') {
+          range.value = range.max;
+        }
+      });
+
+      document.getElementById('filter-form').submit();
+    });
+
     // for slider
-    const budgetSlider = document.getElementById("budget-slider");
+    const minBudgetSlider = document.getElementById("min-budget-slider");
+    const maxBudgetSlider = document.getElementById("max-budget-slider");
     const minBudgetDisplay = document.getElementById("min-budget");
     const maxBudgetDisplay = document.getElementById("max-budget");
   
-    budgetSlider.addEventListener("input", (e) => {
+    minBudgetSlider.addEventListener("input", (e) => {
       const value = parseInt(e.target.value);
       minBudgetDisplay.textContent = `₹${value}`;
+    });
+
+    maxBudgetSlider.addEventListener("input", (e) => {
+      const value = parseInt(e.target.value);
+      maxBudgetDisplay.textContent = `₹${value}`;
     });
   </script>
 {% endblock %}

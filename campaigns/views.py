@@ -1,8 +1,8 @@
 from django.shortcuts import redirect, render
 from django.views.generic import View
 from campaigns.forms import CampaignForm, ReportForm
-from campaigns.models import Campaign, DismissedNotification, EscrowTransaction, Proposal, Rating
-from django.db.models import Avg
+from campaigns.models import Audience, Campaign, ContentType, DismissedNotification, EscrowTransaction, Proposal, Rating
+from django.db.models import Avg, Q, Max
 from decouple import config
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -101,7 +101,7 @@ class CampaignListView(View):
     template_name = 'campaign_list.html'
 
     def get(self, request, *args, **kwargs):
-        brand_type = request.GET.getlist('brand_type')
+        search_query = request.GET.get('search', '')
         content_type = request.GET.getlist('content_type')
         audience_type = request.GET.getlist('audience_type')
         min_budget = request.GET.get('min_budget')
@@ -109,8 +109,12 @@ class CampaignListView(View):
 
         campaigns = Campaign.objects.exclude(status__in=['completed', 'closed'])
 
-        if brand_type:
-            campaigns = campaigns.filter(brand__brand_type__in=brand_type)
+        if search_query:
+            campaigns = campaigns.filter(
+                Q(title__icontains=search_query) |
+                Q(brand__brand_name__icontains=search_query) |
+                Q(region__icontains=search_query)
+            )
         
         if content_type:
             campaigns = campaigns.filter(content_types__name__in=content_type).distinct()
@@ -121,17 +125,26 @@ class CampaignListView(View):
         if min_budget and max_budget:
             campaigns = campaigns.filter(budget__gte=min_budget, budget__lte=max_budget)
 
+        # values for filters
+        all_content_types = ContentType.objects.all()
+        all_audience_types = Audience.objects.all()
+        
+        # maximum budget from the database
+        max_budget_value = Campaign.objects.aggregate(Max('budget'))['budget__max'] + 1000 or 100000
+
         context = {
             'campaigns': campaigns,
-            'selected_brand_type': brand_type,
+            'search_query': search_query,
             'selected_content_type': content_type,
             'selected_audience_type': audience_type,
             'min_budget': min_budget,
             'max_budget': max_budget,
+            'all_content_types': all_content_types,
+            'all_audience_types': all_audience_types,
+            'max_budget_value': max_budget_value,
         }
         
         return render(request, self.template_name, context)
-
 
 class CampaignDetailView(View):
     
