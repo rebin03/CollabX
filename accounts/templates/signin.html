@@ -44,8 +44,95 @@
             <span>Sign In with Google</span>
         </a>
         <div class="text-center mt-5">
-            <span>Are you new here?<a href="" class="text-blue-500"> Register</a></span>
+            <span>Are you new here? <button href="" class="text-blue-500" data-dialog-target="modal"> Register</button></span>
         </div>
     </div>
 </div>
+
+<!-- <button 
+  data-dialog-target="modal"
+  class="rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2" type="button">
+  Open Modal
+</button> -->
+<div
+  data-dialog-backdrop="modal"
+  data-dialog-backdrop-close="true"
+  class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300"
+>
+  <div
+    data-dialog="modal"
+    class="relative m-4 p-4 w-2/5 min-w-[40%] max-w-[40%] rounded-lg bg-white shadow-sm"
+  >
+    <div class="flex justify-center items-center pb-4 text-2xl font-medium text-slate-600">
+      Choose your role to get started!
+    </div>
+    <div class="flex flex-col items-center gap-4 py-4">
+      <a
+        href="{% url 'creator-signup' %}"
+        class="w-full max-w-[200px] rounded-md bg-purple-400 py-2 px-4 text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-blue-700 focus:shadow-none active:bg-purple-700 hover:bg-purple-500 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+        type="button"
+      >
+        Creator
+      </a>
+      <a
+        href="{% url 'brand-signup' %}"
+        class="w-full max-w-[200px] rounded-md bg-purple-200 py-2 px-4 text-center text-sm text-slate-700 hover:text-white transition-all shadow-md hover:shadow-lg focus:bg-green-700 focus:shadow-none active:bg-purple-400 hover:bg-purple-500 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+        type="button"
+      >
+        Brand
+      </a>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const openModalButtons = document.querySelectorAll('[data-dialog-target]');
+    const closeModalButtons = document.querySelectorAll('[data-dialog-close]');
+    const modalBackdrops = document.querySelectorAll('[data-dialog-backdrop]');
+
+    openModalButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const modalId = button.getAttribute('data-dialog-target');
+        const modal = document.querySelector(`[data-dialog="${modalId}"]`);
+        const backdrop = document.querySelector(`[data-dialog-backdrop="${modalId}"]`);
+
+        if (modal && backdrop) {
+          modal.classList.remove('pointer-events-none', 'opacity-0');
+          backdrop.classList.remove('pointer-events-none', 'opacity-0');
+        }
+      });
+    });
+
+    closeModalButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const modal = button.closest('[data-dialog]');
+        const backdrop = document.querySelector(`[data-dialog-backdrop="${modal.getAttribute('data-dialog')}"]`);
+
+        if (modal && backdrop) {
+          modal.classList.add('pointer-events-none', 'opacity-0');
+          backdrop.classList.add('pointer-events-none', 'opacity-0');
+        }
+      });
+    });
+
+    modalBackdrops.forEach(backdrop => {
+      backdrop.addEventListener('click', (event) => {
+        if (event.target === backdrop && backdrop.getAttribute('data-dialog-backdrop-close') === 'true') {
+          const modalId = backdrop.getAttribute('data-dialog-backdrop');
+          const modal = document.querySelector(`[data-dialog="${modalId}"]`);
+
+          if (modal) {
+            modal.classList.add('pointer-events-none', 'opacity-0');
+            backdrop.classList.add('pointer-events-none', 'opacity-0');
+          }
+        }
+      });
+    });
+  });
+</script>
 {% endblock %}
