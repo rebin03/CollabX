@@ -2,9 +2,10 @@ from django.shortcuts import redirect, render
 from django.views.generic import View
 from accounts.forms import BrandProfileForm, BrandSignUpForm, CreatorProfileForm, CreatorSignUpForm, ProfileForm, SignInForm
 from django.core.mail import send_mail
-from accounts.models import User
+from accounts.models import Niche, Platform, User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Q
 
 # Create your views here.
 
@@ -153,7 +154,7 @@ class SignInView(View):
                     if user_obj.is_brand:
                         # Check if the user has a profile
                         if request.user.has_profile:
-                            return redirect('brand-dashboard')
+                            return redirect('home')
                         else:
                             return redirect('create-brand-profile')
                     else:
@@ -273,11 +274,47 @@ class CreatorListView(View):
     template_name = 'creators_list.html'
 
     def get(self, request, *args, **kwargs):
-        
-        qs = User.objects.filter(is_brand=0, is_staff=0)
-        
+        search_query = request.GET.get('search', '')
+        categories = request.GET.getlist('categories')
+        followers = request.GET.get('followers')
+        platforms = request.GET.getlist('platforms')
+
+        creators = User.objects.filter(is_brand=False, is_staff=False)
+
+        if search_query:
+            creators = creators.filter(
+                Q(profile__full_name__icontains=search_query) |
+                Q(profile__creator_profile__niche__name__icontains=search_query) |
+                Q(profile__creator_profile__platform__name__icontains=search_query)
+            ).distinct()
+
+        if categories:
+            creators = creators.filter(profile__creator_profile__niche__name__in=categories).distinct()
+
+        if followers:
+            if followers == '0-50K':
+                creators = creators.filter(profile__creator_profile__follower_count__lte=50)
+            elif followers == '50K-100K':
+                creators = creators.filter(profile__creator_profile__follower_count__gt=50, profile__creator_profile__follower_count__lte=100)
+            elif followers == '100K-500K':
+                creators = creators.filter(profile__creator_profile__follower_count__gt=100, profile__creator_profile__follower_count__lte=500)
+            elif followers == '500K+':
+                creators = creators.filter(profile__creator_profile__follower_count__gt=500)
+
+        if platforms:
+            creators = creators.filter(profile__creator_profile__platform__name__in=platforms).distinct()
+
+        all_categories = Niche.objects.all()
+        all_platforms = Platform.objects.all()
+
         context = {
-            'creators': qs
+            'creators': creators,
+            'search_query': search_query,
+            'selected_categories': categories,
+            'selected_followers': followers,
+            'selected_platforms': platforms,
+            'all_categories': all_categories,
+            'all_platforms': all_platforms,
         }
         
         return render(request, self.template_name, context)

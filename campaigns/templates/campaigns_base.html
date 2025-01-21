@@ -10,7 +10,18 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
 {% block style %}
-
+<style>
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+  }
+  .content {
+    padding-top: 4rem; /* Adjust this value based on the height of your navbar */
+  }
+</style>
 {% endblock %}
 <body>
 
@@ -34,79 +45,152 @@
       {% endfor %}
     {% endif %}
 
+    <!-- Navbar -->
+    <nav class="navbar bg-white shadow-md">
+      <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="text-purple-500 font-bold text-2xl"><a href="{% url 'home' %}">CollabX</a></div>
+        <!-- Hamburger Menu -->
+        <button id="menu-button" class="text-gray-600 block md:hidden focus:outline-none">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+        <!-- Navigation Links -->
+        <div id="menu" class="hidden md:flex space-x-6 items-center">
+          <a href="{% url 'home' %}" class="text-gray-600 hover:text-purple-500 font-medium">Home</a>
+          {% if user.is_authenticated %}
+            {% if user.is_brand %}
+              <a href="{% url 'brand-dashboard' %}" class="text-gray-600 hover:text-purple-500 font-medium">Dashboard</a>
+            {% else %}
+              <a href="{% url 'creator-dashboard' %}" class="text-gray-600 hover:text-purple-500 font-medium">Dashboard</a>
+            {% endif %}
+            <div class="relative">
+              <button id="profile-button" class="text-gray-600 hover:text-purple-500 focus:outline-none">
+                <i class="fas fa-user-circle text-2xl"></i>
+              </button>
+              <div id="profile-menu" class="hidden absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg py-2">
+                <a href="" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a>
+                <a href="{% url 'signout' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
+              </div>
+            </div>
+          {% else %}
+            <a href="{% url 'signin' %}" class="text-gray-600 hover:text-purple-500 font-medium">Sign In</a>
+          {% endif %}
+        </div>
+      </div>
+      <!-- Mobile Menu -->
+      <div id="mobile-menu" class="hidden bg-white shadow-md md:hidden">
+        {% if user.is_authenticated %}
+          {% if user.is_brand %}
+            <a href="{% url 'brand-dashboard' %}" class="block py-2 px-4 text-gray-600 hover:text-purple-500 font-medium">Dashboard</a>
+          {% else %}
+            <a href="{% url 'creator-dashboard' %}" class="block py-2 px-4 text-gray-600 hover:text-purple-500 font-medium">Dashboard</a>
+          {% endif %}
+          <a href="" class="block py-2 px-4 text-gray-600 hover:text-purple-500 font-medium">Profile</a>
+          <a href="{% url 'signout' %}" class="block py-2 px-4 text-gray-600 hover:text-purple-500 font-medium">Logout</a>
+        {% else %}
+          <a href="{% url 'signin' %}" class="block py-2 px-4 text-gray-600 hover:text-purple-500 font-medium">Sign In</a>
+        {% endif %}
+      </div>
+    </nav>
+
     {% block main %}
 
     {% endblock %}
     
 </body>
+
 <script>
-    //Alert message closing
-    document.addEventListener('DOMContentLoaded', function () {
-        const alertBox = document.getElementById('alert');
-        const closeButton = document.getElementById('closeAlert');
-    
-        // Automatically close the alert after 5 seconds
-        setTimeout(() => {
-            if (alertBox) {
-                alertBox.style.opacity = '0';
-                setTimeout(() => alertBox.remove(), 500); // Allow fade-out animation before removal
-            }
-        }, 5000);
-    
-        // Manually close the alert
-        if (closeButton) {
-            closeButton.addEventListener('click', () => {
-                alertBox.style.opacity = '0';
-                setTimeout(() => alertBox.remove(), 500);
-            });
-        }
-    });
-
-    //Image upload and dropping
-    const dropArea = document.getElementById('drop-area');
-    const fileInput = document.getElementById('fileInput');
-    const preview = document.getElementById('preview');
-    const dropText = document.getElementById('drop-text');
-
-    // Trigger file input when clicked
-    dropArea.addEventListener('click', () => fileInput.click());
-
-    // Handle file selection
-    fileInput.addEventListener('change', handleFile);
-
-    // Drag and Drop
-    dropArea.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropArea.classList.add('border-purple-500');
-    });
-
-    dropArea.addEventListener('dragleave', () => {
-      dropArea.classList.remove('border-purple-500');
-    });
-
-    dropArea.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropArea.classList.remove('border-purple-500');
-      fileInput.files = e.dataTransfer.files;
-      handleFile();
-    });
-
-    function handleFile() {
-      const file = fileInput.files[0];
-      if (file && file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          preview.src = reader.result;
-          preview.classList.remove('hidden');
-          dropText.textContent = file.name;
-        };
-        reader.readAsDataURL(file);
-      } else {
-        alert('Please upload a valid image file.');
+  //Alert message closing
+  document.addEventListener('DOMContentLoaded', function () {
+      const alertBox = document.getElementById('alert');
+      const closeButton = document.getElementById('closeAlert');
+  
+      // Automatically close the alert after 5 seconds
+      setTimeout(() => {
+          if (alertBox) {
+              alertBox.style.opacity = '0';
+              setTimeout(() => alertBox.remove(), 500); // Allow fade-out animation before removal
+          }
+      }, 5000);
+  
+      // Manually close the alert
+      if (closeButton) {
+          closeButton.addEventListener('click', () => {
+              alertBox.style.opacity = '0';
+              setTimeout(() => alertBox.remove(), 500);
+          });
       }
+  });
+
+  //Image upload and dropping
+  const dropArea = document.getElementById('drop-area');
+  const fileInput = document.getElementById('fileInput');
+  const preview = document.getElementById('preview');
+  const dropText = document.getElementById('drop-text');
+
+  // Trigger file input when clicked
+  dropArea.addEventListener('click', () => fileInput.click());
+
+  // Handle file selection
+  fileInput.addEventListener('change', handleFile);
+
+  // Drag and Drop
+  dropArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropArea.classList.add('border-purple-500');
+  });
+
+  dropArea.addEventListener('dragleave', () => {
+    dropArea.classList.remove('border-purple-500');
+  });
+
+  dropArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropArea.classList.remove('border-purple-500');
+    fileInput.files = e.dataTransfer.files;
+    handleFile();
+  });
+
+  function handleFile() {
+    const file = fileInput.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        preview.src = reader.result;
+        preview.classList.remove('hidden');
+        dropText.textContent = file.name;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert('Please upload a valid image file.');
     }
+  }
+</script>
+<script>
+  //navbar menu button
+  const menuButton = document.getElementById('menu-button');
+  const menu = document.getElementById('menu');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const profileButton = document.getElementById('profile-button');
+  const profileMenu = document.getElementById('profile-menu');
+
+  menuButton.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+  });
+
+  profileButton.addEventListener('click', (event) => {
+    event.stopPropagation();
+    profileMenu.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (event) => {
+    const isClickInsideProfileMenu = profileMenu.contains(event.target);
+    const isClickInsideProfileButton = profileButton.contains(event.target);
+
+    if (!isClickInsideProfileMenu && !isClickInsideProfileButton) {
+      profileMenu.classList.add('hidden');
+    }
+  });
 </script>
 {% block script %}
-
 {% endblock %}
 </html>

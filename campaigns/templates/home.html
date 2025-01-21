@@ -28,6 +28,7 @@
       </button>
       <!-- Navigation Links -->
       <div id="menu" class="hidden md:flex space-x-6 items-center">
+        <a href="{% url 'home' %}" class="text-gray-600 hover:text-purple-500 font-medium">Home</a>
         {% if user.is_authenticated %}
           {% if user.is_brand %}
             <a href="{% url 'brand-dashboard' %}" class="text-gray-600 hover:text-purple-500 font-medium">Dashboard</a>
